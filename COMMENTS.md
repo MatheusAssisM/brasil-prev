@@ -143,19 +143,8 @@ curl -X POST http://localhost:8000/game/simulate
 **Response:**
 ```json
 {
-  "winner": "Impulsive Player",
-  "rounds": 127,
-  "timeout": false,
-  "players": [
-    {
-      "name": "Impulsive Player",
-      "strategy": "Impulsive",
-      "balance": 1453,
-      "properties_owned": 15,
-      "is_active": true
-    },
-    ...
-  ]
+  "winner": "impulsive",
+  "players": ["impulsive", "demanding", "cautious", "random"]
 }
 ```
 
@@ -186,7 +175,7 @@ curl -X POST http://localhost:8000/game/stats \
   "avg_rounds": 345.2,
   "strategy_statistics": [
     {
-      "strategy": "Impulsive",
+      "strategy": "impulsive",
       "wins": 125,
       "win_rate": 0.42,
       "timeouts": 12,
@@ -194,7 +183,7 @@ curl -X POST http://localhost:8000/game/stats \
     },
     ...
   ],
-  "most_winning_strategy": "Impulsive"
+  "most_winning_strategy": "impulsive"
 }
 ```
 
@@ -338,6 +327,9 @@ class ImpulsiveStrategy(PurchaseStrategy):
 class DemandingStrategy(PurchaseStrategy):
     def should_buy(self, player: Player, property: Property) -> bool:
         return property.rent > self.rent_threshold  # Conditional
+
+    def get_name(self) -> str:
+        return "demanding"
 ```
 
 Each strategy implements `PurchaseStrategy` interface with pure decision logic—no access to Player internals.

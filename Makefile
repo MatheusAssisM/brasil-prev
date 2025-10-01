@@ -7,7 +7,6 @@ help:
 	@echo "  make install    - Install dependencies and project"
 	@echo "  make test       - Run tests"
 	@echo "  make run        - Start the API server"
-	@echo "  make demo       - Run demonstration"
 	@echo "  make clean      - Clean up cache and build files"
 
 install:
@@ -19,9 +18,6 @@ test:
 
 run:
 	uv run start
-
-demo:
-	uv run python demo.py
 
 clean:
 	rm -rf .pytest_cache __pycache__ .ruff_cache

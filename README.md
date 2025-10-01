@@ -101,19 +101,8 @@ curl -X POST http://localhost:8000/game/simulate
 **Response:**
 ```json
 {
-  "winner": "Impulsive Player",
-  "rounds": 245,
-  "timeout": false,
-  "players": [
-    {
-      "name": "Impulsive Player",
-      "strategy": "Impulsive",
-      "balance": 1250,
-      "properties_owned": 12,
-      "is_active": true
-    },
-    ...
-  ]
+  "winner": "impulsive",
+  "players": ["impulsive", "demanding", "cautious", "random"]
 }
 ```
 
@@ -133,7 +122,7 @@ curl -X POST http://localhost:8000/game/stats \
   "avg_rounds": 342.5,
   "strategy_statistics": [
     {
-      "strategy": "Impulsive",
+      "strategy": "impulsive",
       "wins": 120,
       "win_rate": 0.40,
       "timeouts": 15,
@@ -141,7 +130,7 @@ curl -X POST http://localhost:8000/game/stats \
     },
     ...
   ],
-  "most_winning_strategy": "Impulsive"
+  "most_winning_strategy": "impulsive"
 }
 ```
 
