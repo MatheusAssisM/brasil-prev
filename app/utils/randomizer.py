@@ -1,7 +1,5 @@
-"""Utilities for randomization (dice rolls, property generation, etc.)."""
-
 import random
-from typing import List
+from typing import Optional
 
 from app.game.models import Property, Board
 from app.core.config import GameConfig
@@ -14,12 +12,18 @@ def roll_dice() -> int:
 
 def generate_random_property() -> Property:
     """Generate a property with random cost and rent values."""
-    cost = random.randint(GameConfig.MIN_PROPERTY_COST, GameConfig.MAX_PROPERTY_COST)
-    rent = random.randint(GameConfig.MIN_PROPERTY_RENT, GameConfig.MAX_PROPERTY_RENT)
+    cost = random.randint(
+        GameConfig.MIN_PROPERTY_COST,
+        GameConfig.MAX_PROPERTY_COST
+    )
+    rent = random.randint(
+        GameConfig.MIN_PROPERTY_RENT,
+        GameConfig.MAX_PROPERTY_RENT
+    )
     return Property(cost=cost, rent=rent)
 
 
-def generate_board(num_properties: int = None) -> Board:
+def generate_board(num_properties: Optional[int] = None) -> Board:
     """
     Generate a game board with random properties.
 

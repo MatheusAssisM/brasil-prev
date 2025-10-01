@@ -1,30 +1,29 @@
-"""Domain models for the Monopoly game."""
-
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, List, Optional
 
 if TYPE_CHECKING:
     from app.core.interfaces import PurchaseStrategy
 
 
+@dataclass(frozen=True)
 class Property:
-    """Represents a property on the board."""
+    """Represents a property on the board (immutable)."""
 
-    def __init__(self, cost: int, rent: int):
-        self.cost = cost
-        self.rent = rent
-        self.owner: Optional['Player'] = None
+    cost: int
+    rent: int
+    owner: Optional['Player'] = field(default=None, compare=False)
 
     def is_owned(self) -> bool:
         """Check if property has an owner."""
         return self.owner is not None
 
-    def set_owner(self, player: 'Player') -> None:
-        """Set the owner of this property."""
-        self.owner = player
+    def with_owner(self, player: Optional['Player']) -> 'Property':
+        """Return a new Property instance with a different owner."""
+        return Property(cost=self.cost, rent=self.rent, owner=player)
 
-    def reset_owner(self) -> None:
-        """Remove the owner of this property."""
-        self.owner = None
+    def reset_owner(self) -> 'Property':
+        """Return a new Property instance with no owner."""
+        return Property(cost=self.cost, rent=self.rent, owner=None)
 
 
 class Player:
@@ -43,13 +42,16 @@ class Player:
         self.properties: List[Property] = []
         self.is_active = True
 
-    def move(self, steps: int, board_size: int, round_salary: int = 100) -> int:
+    def move(
+        self, steps: int, board_size: int, round_salary: int = 100
+    ) -> int:
         """Move player forward by steps, handling board wraparound."""
         old_position = self.position
         self.position = (self.position + steps) % board_size
 
         # Check if player completed a full round (passed position 0)
-        if self.position < old_position or (old_position + steps >= board_size):
+        if (self.position < old_position or
+                (old_position + steps >= board_size)):
             self.balance += round_salary
 
         return self.position
@@ -59,14 +61,19 @@ class Player:
         return self.balance >= property_cost
 
     def buy_property(self, property: Property) -> bool:
-        """Attempt to buy a property using the player's strategy."""
+        """
+        Attempt to buy a property using the player's strategy.
+
+        Note: This method returns True if purchase is desired and
+        affordable. The actual owner assignment should be handled by
+        the caller (GameEngine).
+        """
         if not self.can_buy(property.cost):
             return False
 
         if self.strategy.should_buy(self, property):
             self.balance -= property.cost
             self.properties.append(property)
-            property.set_owner(self)
             return True
 
         return False
@@ -81,27 +88,47 @@ class Player:
         """Receive rent from another player."""
         self.balance += amount
 
-    def eliminate(self) -> None:
-        """Eliminate player and release all properties."""
+    def eliminate(self) -> List[Property]:
+        """
+        Eliminate player and return properties to be released.
+
+        Returns:
+            List of properties that need to be released
+        """
         self.is_active = False
-        for property in self.properties:
-            property.reset_owner()
+        properties_to_release = self.properties.copy()
         self.properties.clear()
+        return properties_to_release
 
 
 class Board:
-    """Represents the game board with properties."""
+    """Represents the game board with properties using repository pattern."""
 
     def __init__(self, properties: List[Property]):
-        self.properties = properties
+        """
+        Initialize board with properties (will use repository internally).
+        """
+        from app.game.repositories import InMemoryPropertyRepository
+        self._repository = InMemoryPropertyRepository(properties)
 
     def get_property(self, position: int) -> Property:
         """Get property at a specific position."""
-        return self.properties[position]
+        return self._repository.get_property(position)
+
+    def set_property_owner(
+        self, position: int, player: Optional['Player']
+    ) -> None:
+        """Set the owner of a property at a specific position."""
+        self._repository.set_owner(position, player)
 
     def size(self) -> int:
         """Return the number of properties on the board."""
-        return len(self.properties)
+        return self._repository.size()
+
+    @property
+    def repository(self):
+        """Expose repository for advanced operations."""
+        return self._repository
 
 
 class GameState:

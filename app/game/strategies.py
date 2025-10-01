@@ -1,5 +1,3 @@
-"""Player purchase decision strategies."""
-
 import random
 from typing import TYPE_CHECKING
 

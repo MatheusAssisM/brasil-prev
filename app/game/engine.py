@@ -1,6 +1,4 @@
-"""Game engine that orchestrates the game flow and enforces rules."""
-
-from typing import List
+from typing import Callable, Dict, Any, List, Optional
 
 from app.game.models import Player, Board, GameState, Property
 from app.core.config import GameConfig
@@ -11,7 +9,7 @@ class GameEngine:
     Main game engine that orchestrates the game flow and enforces rules.
     """
 
-    def __init__(self, players: List[Player], board: Board):
+    def __init__(self, players: List[Player], board: Board) -> None:
         """
         Initialize the game engine.
 
@@ -19,14 +17,14 @@ class GameEngine:
             players: List of players participating in the game
             board: Board instance with properties
         """
-        self.state = GameState(
+        self.state: GameState = GameState(
             players=players,
             board=board,
             max_rounds=GameConfig.MAX_ROUNDS
         )
-        self.dice_roller = None  # Will be injected
+        self.dice_roller: Optional[Callable[[], int]] = None
 
-    def set_dice_roller(self, dice_roller):
+    def set_dice_roller(self, dice_roller: Callable[[], int]) -> None:
         """Inject dice roller dependency."""
         self.dice_roller = dice_roller
 
@@ -64,7 +62,16 @@ class GameEngine:
 
         # Check if player is eliminated
         if player.balance < 0:
-            player.eliminate()
+            released_properties = player.eliminate()
+            # Release all properties owned by eliminated player
+            for prop in released_properties:
+                # Find position of this property and reset owner
+                for pos in range(self.state.board.size()):
+                    board_prop = self.state.board.get_property(pos)
+                    if (board_prop.cost == prop.cost and
+                            board_prop.rent == prop.rent):
+                        self.state.board.set_property_owner(pos, None)
+                        break
 
     def _handle_property_landing(self, player: Player, property: Property) -> None:
         """
@@ -76,8 +83,10 @@ class GameEngine:
         """
         if not property.is_owned():
             # Property is available - try to buy it
-            player.buy_property(property)
-        elif property.owner != player:
+            if player.buy_property(property):
+                # Update ownership in the board repository
+                self.state.board.set_property_owner(player.position, player)
+        elif property.owner != player and property.owner is not None:
             # Property is owned by another player - pay rent
             owner = property.owner
             player.pay_rent(property.rent)
@@ -106,7 +115,7 @@ class GameEngine:
 
         return self.state
 
-    def get_game_result(self) -> dict:
+    def get_game_result(self) -> Dict[str, Any]:
         """
         Get a summary of the game results.
 

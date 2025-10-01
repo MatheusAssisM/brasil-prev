@@ -1,42 +1,23 @@
-"""Game simulation service - orchestrates matches and formats results."""
-
-from typing import List
+from typing import Dict, Any
 from collections import defaultdict
 
-from app.game.models import Player
+from app.game.factories import PlayerFactory
 from app.game.engine import GameEngine
-from app.game.strategies import (
-    ImpulsiveStrategy,
-    DemandingStrategy,
-    CautiousStrategy,
-    RandomStrategy,
-)
 from app.utils.randomizer import generate_board, roll_dice
-from app.core.config import GameConfig
 
 
 class GameSimulator:
     """Service that orchestrates game simulations and formats results."""
 
     @staticmethod
-    def create_default_players() -> List[Player]:
-        """Create the standard 4 players with different strategies."""
-        return [
-            Player("Impulsive Player", ImpulsiveStrategy(), GameConfig.INITIAL_BALANCE),
-            Player("Demanding Player", DemandingStrategy(GameConfig.DEMANDING_RENT_THRESHOLD), GameConfig.INITIAL_BALANCE),
-            Player("Cautious Player", CautiousStrategy(GameConfig.CAUTIOUS_RESERVE_THRESHOLD), GameConfig.INITIAL_BALANCE),
-            Player("Random Player", RandomStrategy(), GameConfig.INITIAL_BALANCE),
-        ]
-
-    @staticmethod
-    def run_single_simulation() -> dict:
+    def run_single_simulation() -> Dict[str, Any]:
         """
         Run a single game simulation with default players.
 
         Returns:
             Dictionary with complete game statistics
         """
-        players = GameSimulator.create_default_players()
+        players = PlayerFactory.create_default_players()
         board = generate_board()
         engine = GameEngine(players, board)
         engine.set_dice_roller(roll_dice)
@@ -45,7 +26,7 @@ class GameSimulator:
         return engine.get_game_result()
 
     @staticmethod
-    def run_batch_simulation(num_simulations: int) -> dict:
+    def run_batch_simulation(num_simulations: int) -> Dict[str, Any]:
         """
         Run multiple game simulations and aggregate statistics.
 
