@@ -46,8 +46,10 @@ app/
 │   └── config.py       # GameConfig, Settings
 │
 ├── game/           # Domain logic (business rules)
-│   ├── models.py       # Property, Player, Board, GameState
+│   ├── models.py       # Property (dataclass), Player, Board, GameState
 │   ├── strategies.py   # ImpulsiveStrategy, DemandingStrategy, etc.
+│   ├── factories.py    # PlayerFactory (Factory pattern)
+│   ├── repositories.py # PropertyRepository (Repository pattern)
 │   └── engine.py       # GameEngine (turn execution, rule enforcement)
 │
 ├── services/       # Application services (use cases)
@@ -65,7 +67,11 @@ app/
 ### Key Design Patterns
 
 - **Strategy Pattern**: Player behaviors are decoupled via `PurchaseStrategy` interface
+- **Factory Pattern**: `PlayerFactory` centralizes player creation with different strategies
+- **Repository Pattern**: `InMemoryPropertyRepository` isolates property storage from business logic
+- **Immutable Data**: `Property` is a frozen dataclass preventing accidental mutations
 - **Dependency Injection**: Dice roller can be injected into GameEngine (facilitates testing)
+- **Type Hints**: Comprehensive typing support throughout the codebase
 - **Clean Architecture**: Domain logic is independent of infrastructure concerns
 
 ## Installation
@@ -334,6 +340,63 @@ class DemandingStrategy(PurchaseStrategy):
 
 Each strategy implements `PurchaseStrategy` interface with pure decision logic—no access to Player internals.
 
+### 7. Factory Pattern
+
+**File**: `app/game/factories.py`
+
+```python
+class PlayerFactory:
+    @staticmethod
+    def create_impulsive_player(name: str = "Impulsive Player",
+                                balance: int = 300) -> Player:
+        return Player(name, ImpulsiveStrategy(), balance)
+
+    @staticmethod
+    def create_default_players() -> List[Player]:
+        return [
+            PlayerFactory.create_impulsive_player(),
+            PlayerFactory.create_demanding_player(),
+            PlayerFactory.create_cautious_player(),
+            PlayerFactory.create_random_player(),
+        ]
+```
+
+The factory encapsulates player creation logic and ensures consistent initialization.
+
+### 8. Repository Pattern
+
+**File**: `app/game/repositories.py`
+
+```python
+class InMemoryPropertyRepository(PropertyRepository):
+    def get_property(self, position: int) -> Property:
+        base_property = self._properties[position]
+        current_owner = self._owners[position]
+        return base_property.with_owner(current_owner)
+
+    def set_owner(self, position: int, player: Optional[Player]) -> None:
+        self._owners[position] = player
+```
+
+The repository separates property data storage from business logic, making it easy to swap implementations.
+
+### 9. Immutable Property (Dataclass)
+
+**File**: `app/game/models.py`
+
+```python
+@dataclass(frozen=True)
+class Property:
+    cost: int
+    rent: int
+    owner: Optional['Player'] = field(default=None, compare=False)
+
+    def with_owner(self, player: Optional['Player']) -> 'Property':
+        return Property(cost=self.cost, rent=self.rent, owner=player)
+```
+
+Properties are immutable—ownership changes create new instances instead of mutating.
+
 ## Design Decisions
 
 ### 1. Why Strategy Pattern?
@@ -374,6 +437,42 @@ Each strategy implements `PurchaseStrategy` interface with pure decision logic�
 - Domain logic should be independent of delivery mechanism
 - Models can be reused in CLI, GUI, or other interfaces
 - Follows Clean Architecture: domain at the center, infrastructure at edges
+
+### 6. Why Factory Pattern?
+
+**Reasoning**:
+- Centralizes player creation logic in one place
+- Encapsulates strategy instantiation details
+- Makes it easy to change default configurations
+- Consistent player creation across the application
+- Follows Single Responsibility Principle
+
+### 7. Why Repository Pattern?
+
+**Reasoning**:
+- Separates data access logic from business logic
+- Makes it easy to swap storage implementations (in-memory → database)
+- Provides clean interface for querying and managing entities
+- Centralizes property ownership management
+- Follows Dependency Inversion Principle
+
+### 8. Why Immutable Dataclasses?
+
+**Reasoning**:
+- Prevents accidental mutations and side effects
+- Makes code more predictable and easier to debug
+- Thread-safe by default
+- Encourages functional programming patterns
+- Clearly separates data from behavior
+
+### 9. Why Comprehensive Type Hints?
+
+**Reasoning**:
+- Improves IDE support and autocomplete
+- Catches type errors early (with mypy/pylance)
+- Serves as inline documentation
+- Makes refactoring safer
+- Improves code maintainability
 
 ## Conclusion
 

@@ -10,6 +10,10 @@ A Python-based simulation of a simplified Monopoly-style board game with clean a
   - **Demanding**: Only buys properties with rent above 50
   - **Cautious**: Only buys if balance remains above 80 after purchase
   - **Random**: 50% chance to buy any property
+- **Factory Pattern**: Centralized player creation with `PlayerFactory`
+- **Repository Pattern**: In-memory property repository for entity storage
+- **Immutable Data**: Properties implemented as frozen dataclasses
+- **Comprehensive Type Hints**: Full typing support using Python's `typing` module
 - **Game Rules**:
   - 20 properties with random costs (50-200) and rents (10-100)
   - 4 players start with 300 balance
@@ -25,12 +29,14 @@ A Python-based simulation of a simplified Monopoly-style board game with clean a
 monopoly-simulator-api/
 ├── app/
 │   ├── core/               # Contracts, abstractions, configs
-│   │   ├── interfaces.py   # EstrategiaCompra interface
+│   │   ├── interfaces.py   # PurchaseStrategy interface
 │   │   └── config.py       # GameConfig, Settings
 │   │
 │   ├── game/               # Domain logic (business rules)
-│   │   ├── models.py       # Player, Property, Board, GameState
+│   │   ├── models.py       # Player, Property (dataclass), Board, GameState
 │   │   ├── strategies.py   # Strategy implementations
+│   │   ├── factories.py    # Factory pattern for player creation
+│   │   ├── repositories.py # Repository pattern for property storage
 │   │   └── engine.py       # Game engine (turn execution, rules)
 │   │
 │   ├── services/           # Application services (use cases)
@@ -170,6 +176,46 @@ Player behaviors are implemented as strategies without conditional logic inside 
 - Keeps business logic separate from player state
 - Makes strategies easily testable and extensible
 - Follows Open/Closed Principle
+
+### Factory Pattern
+`PlayerFactory` centralizes player creation logic:
+- Encapsulates strategy instantiation
+- Provides convenient methods for creating players with different strategies
+- Makes it easy to change default configurations
+- Enables consistent player creation across the application
+
+Example:
+```python
+from app.game.factories import PlayerFactory
+
+# Create individual players
+impulsive = PlayerFactory.create_impulsive_player("Alice")
+cautious = PlayerFactory.create_cautious_player("Bob", balance=500)
+
+# Create default set of players
+players = PlayerFactory.create_default_players()
+```
+
+### Repository Pattern
+`InMemoryPropertyRepository` isolates property storage from business logic:
+- Separates data access from domain models
+- Makes it easy to swap storage implementations (e.g., database)
+- Centralizes property ownership management
+- Provides clean interface for property queries
+
+### Immutable Data Structures
+`Property` is implemented as a frozen dataclass:
+- Prevents accidental mutations
+- Makes code more predictable and easier to reason about
+- Ownership changes create new instances rather than mutating existing ones
+- Supports functional programming patterns
+
+### Type Hints
+Comprehensive type annotations throughout:
+- Improved IDE support and autocomplete
+- Better documentation
+- Catch type errors early with mypy
+- Makes code more maintainable
 
 ### Domain-Driven Design
 Clear separation between:
