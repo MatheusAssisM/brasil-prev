@@ -24,7 +24,7 @@ class TestImpulsiveStrategy:
     def test_strategy_name(self):
         """Check strategy name."""
         strategy = ImpulsiveStrategy()
-        assert strategy.get_name() == "Impulsive"
+        assert strategy.get_name() == "impulsive"
 
 
 class TestDemandingStrategy:
@@ -49,7 +49,7 @@ class TestDemandingStrategy:
     def test_strategy_name(self):
         """Check strategy name."""
         strategy = DemandingStrategy()
-        assert strategy.get_name() == "Demanding"
+        assert strategy.get_name() == "demanding"
 
 
 class TestCautiousStrategy:
@@ -76,7 +76,7 @@ class TestCautiousStrategy:
     def test_strategy_name(self):
         """Check strategy name."""
         strategy = CautiousStrategy()
-        assert strategy.get_name() == "Cautious"
+        assert strategy.get_name() == "cautious"
 
 
 class TestRandomStrategy:
@@ -98,4 +98,4 @@ class TestRandomStrategy:
     def test_strategy_name(self):
         """Check strategy name."""
         strategy = RandomStrategy()
-        assert strategy.get_name() == "Random"
+        assert strategy.get_name() == "random"

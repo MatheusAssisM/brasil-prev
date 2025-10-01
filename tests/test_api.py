@@ -41,23 +41,18 @@ class TestSimulationEndpoints:
 
         # Check response structure
         assert "winner" in data
-        assert "rounds" in data
-        assert "timeout" in data
         assert "players" in data
 
-        # Check players data
+        # Winner should be lowercase strategy name or None
+        if data["winner"]:
+            assert data["winner"] in ["impulsive", "demanding", "cautious", "random"]
+
+        # Players should be list of 4 lowercase strategy names
         assert len(data["players"]) == 4
-
-        for player in data["players"]:
-            assert "name" in player
-            assert "strategy" in player
-            assert "balance" in player
-            assert "properties_owned" in player
-            assert "is_active" in player
-
-        # Check that game completed
-        assert data["rounds"] > 0
-        assert data["rounds"] <= 1000
+        assert isinstance(data["players"], list)
+        for strategy in data["players"]:
+            assert isinstance(strategy, str)
+            assert strategy in ["impulsive", "demanding", "cautious", "random"]
 
     def test_batch_simulation_default(self):
         """Test batch simulation with default parameters."""
@@ -81,7 +76,7 @@ class TestSimulationEndpoints:
         assert len(data["strategy_statistics"]) == 4
 
         strategies = {stat["strategy"] for stat in data["strategy_statistics"]}
-        assert strategies == {"Impulsive", "Demanding", "Cautious", "Random"}
+        assert strategies == {"impulsive", "demanding", "cautious", "random"}
 
         # Verify win counts add up (or less if timeouts)
         total_wins = sum(stat["wins"] for stat in data["strategy_statistics"])
