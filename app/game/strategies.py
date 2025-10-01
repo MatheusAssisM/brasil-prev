@@ -19,7 +19,7 @@ class ImpulsiveStrategy(PurchaseStrategy):
         return True
 
     def get_name(self) -> str:
-        return "Impulsive"
+        return "impulsive"
 
 
 class DemandingStrategy(PurchaseStrategy):
@@ -35,7 +35,7 @@ class DemandingStrategy(PurchaseStrategy):
         return property.rent > self.rent_threshold
 
     def get_name(self) -> str:
-        return "Demanding"
+        return "demanding"
 
 
 class CautiousStrategy(PurchaseStrategy):
@@ -52,7 +52,7 @@ class CautiousStrategy(PurchaseStrategy):
         return balance_after_purchase >= self.reserve_threshold
 
     def get_name(self) -> str:
-        return "Cautious"
+        return "cautious"
 
 
 class RandomStrategy(PurchaseStrategy):
@@ -65,4 +65,4 @@ class RandomStrategy(PurchaseStrategy):
         return random.random() < 0.5
 
     def get_name(self) -> str:
-        return "Random"
+        return "random"

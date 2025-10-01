@@ -10,21 +10,10 @@ router = APIRouter()
 
 
 # Request/Response Models
-class PlayerResult(BaseModel):
-    """Result information for a single player."""
-    name: str
-    strategy: str
-    balance: int
-    properties_owned: int
-    is_active: bool
-
-
 class GameResult(BaseModel):
     """Result of a single game simulation."""
     winner: Optional[str] = None
-    rounds: int
-    timeout: bool
-    players: List[PlayerResult]
+    players: List[str]
 
 
 class BatchSimulationRequest(BaseModel):
@@ -62,26 +51,23 @@ async def simulate_game():
     """
     Run a single game simulation with 4 players using different strategies.
 
-    Returns the complete game results including winner, rounds played,
-    and final state of all players.
+    Returns the winner strategy name and list of all player strategies.
     """
     try:
         result = GameSimulator.run_single_simulation()
 
+        # Extract winner strategy (lowercase)
+        winner_strategy = None
+        if result["winner"]:
+            winner_player = next(p for p in result["players"] if p["name"] == result["winner"])
+            winner_strategy = winner_player["strategy"]
+
+        # Extract player strategies in order (lowercase)
+        player_strategies = [p["strategy"] for p in result["players"]]
+
         return GameResult(
-            winner=result["winner"],
-            rounds=result["rounds"],
-            timeout=result["timeout"],
-            players=[
-                PlayerResult(
-                    name=p["name"],
-                    strategy=p["strategy"],
-                    balance=p["balance"],
-                    properties_owned=p["properties_owned"],
-                    is_active=p["is_active"],
-                )
-                for p in result["players"]
-            ],
+            winner=winner_strategy,
+            players=player_strategies,
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Game simulation failed: {str(e)}")

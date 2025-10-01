@@ -81,7 +81,7 @@ class GameSimulator:
 
         # Calculate statistics per strategy
         strategy_stats = []
-        for strategy in ["Impulsive", "Demanding", "Cautious", "Random"]:
+        for strategy in ["impulsive", "demanding", "cautious", "random"]:
             wins = strategy_wins[strategy]
             win_rate = wins / num_simulations if num_simulations > 0 else 0
             rounds_list = strategy_rounds_when_won[strategy]
