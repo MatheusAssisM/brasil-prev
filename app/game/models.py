@@ -1,8 +1,9 @@
-from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, List, Optional
+from __future__ import annotations
 
-if TYPE_CHECKING:
-    from app.core.interfaces import PurchaseStrategy
+from dataclasses import dataclass, field
+from typing import List, Optional
+
+from app.core.interfaces import PurchaseStrategy, PropertyRepository
 
 
 @dataclass(frozen=True)
@@ -11,17 +12,17 @@ class Property:
 
     cost: int
     rent: int
-    owner: Optional['Player'] = field(default=None, compare=False)
+    owner: Optional[Player] = field(default=None, compare=False)
 
     def is_owned(self) -> bool:
         """Check if property has an owner."""
         return self.owner is not None
 
-    def with_owner(self, player: Optional['Player']) -> 'Property':
+    def with_owner(self, player: Optional[Player]) -> Property:
         """Return a new Property instance with a different owner."""
         return Property(cost=self.cost, rent=self.rent, owner=player)
 
-    def reset_owner(self) -> 'Property':
+    def reset_owner(self) -> Property:
         """Return a new Property instance with no owner."""
         return Property(cost=self.cost, rent=self.rent, owner=None)
 
@@ -32,7 +33,7 @@ class Player:
     def __init__(
         self,
         name: str,
-        strategy: 'PurchaseStrategy',
+        strategy: PurchaseStrategy,
         initial_balance: int = 300
     ):
         self.name = name
@@ -104,19 +105,21 @@ class Player:
 class Board:
     """Represents the game board with properties using repository pattern."""
 
-    def __init__(self, properties: List[Property]):
+    def __init__(self, repository: PropertyRepository):
         """
-        Initialize board with properties (will use repository internally).
+        Initialize board with a property repository.
+
+        Args:
+            repository: PropertyRepository implementation for managing properties
         """
-        from app.game.repositories import InMemoryPropertyRepository
-        self._repository = InMemoryPropertyRepository(properties)
+        self._repository = repository
 
     def get_property(self, position: int) -> Property:
         """Get property at a specific position."""
         return self._repository.get_property(position)
 
     def set_property_owner(
-        self, position: int, player: Optional['Player']
+        self, position: int, player: Optional[Player]
     ) -> None:
         """Set the owner of a property at a specific position."""
         self._repository.set_owner(position, player)

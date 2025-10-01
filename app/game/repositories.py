@@ -1,36 +1,9 @@
-from abc import ABC, abstractmethod
+from __future__ import annotations
+
 from typing import Dict, List, Optional
 
+from app.core.interfaces import PropertyRepository
 from app.game.models import Property, Player
-
-
-class PropertyRepository(ABC):
-    """Abstract repository for property management."""
-
-    @abstractmethod
-    def get_property(self, position: int) -> Property:
-        """Get property at a specific position."""
-        pass
-
-    @abstractmethod
-    def get_all_properties(self) -> List[Property]:
-        """Get all properties."""
-        pass
-
-    @abstractmethod
-    def set_owner(self, position: int, player: Optional[Player]) -> None:
-        """Set the owner of a property at a specific position."""
-        pass
-
-    @abstractmethod
-    def get_owner(self, position: int) -> Optional[Player]:
-        """Get the owner of a property at a specific position."""
-        pass
-
-    @abstractmethod
-    def size(self) -> int:
-        """Get the total number of properties."""
-        pass
 
 
 class InMemoryPropertyRepository(PropertyRepository):
