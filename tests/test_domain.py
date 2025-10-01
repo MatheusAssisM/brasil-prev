@@ -2,7 +2,7 @@ import pytest
 
 from app.game.models import Player, Property, Board, GameState
 from app.game.strategies import ImpulsiveStrategy
-from app.utils.randomizer import generate_board
+from app.utils.implementations import RandomBoardGenerator
 
 
 class TestProperty:
@@ -125,14 +125,16 @@ class TestBoard:
 
     def test_board_creation(self):
         """Test creating a board."""
-        board = generate_board(num_properties=20)
+        generator = RandomBoardGenerator()
+        board = generator.generate(num_properties=20)
 
         assert board.size() == 20
         # Board now uses repository pattern, access via get_property
 
     def test_board_properties_are_random(self):
         """Test that board generates properties with varying costs."""
-        board = generate_board(num_properties=20)
+        generator = RandomBoardGenerator()
+        board = generator.generate(num_properties=20)
 
         # Access properties through repository
         costs = [board.get_property(i).cost for i in range(board.size())]
@@ -148,7 +150,8 @@ class TestBoard:
 
     def test_get_property(self):
         """Test getting property by position."""
-        board = generate_board(num_properties=20)
+        generator = RandomBoardGenerator()
+        board = generator.generate(num_properties=20)
 
         prop = board.get_property(5)
         assert isinstance(prop, Property)
@@ -159,8 +162,9 @@ class TestGameState:
 
     def test_game_state_creation(self):
         """Test creating game state."""
+        generator = RandomBoardGenerator()
         players = [Player(f"Player {i}", ImpulsiveStrategy()) for i in range(4)]
-        board = generate_board()
+        board = generator.generate(20)
         state = GameState(players, board)
 
         assert len(state.players) == 4
@@ -171,8 +175,9 @@ class TestGameState:
 
     def test_get_active_players(self):
         """Test getting active players."""
+        generator = RandomBoardGenerator()
         players = [Player(f"Player {i}", ImpulsiveStrategy()) for i in range(4)]
-        board = generate_board()
+        board = generator.generate(20)
         state = GameState(players, board)
 
         # All active initially
@@ -184,8 +189,9 @@ class TestGameState:
 
     def test_victory_condition_one_player(self):
         """Test victory when only one player remains."""
+        generator = RandomBoardGenerator()
         players = [Player(f"Player {i}", ImpulsiveStrategy()) for i in range(4)]
-        board = generate_board()
+        board = generator.generate(20)
         state = GameState(players, board)
 
         # Eliminate all but one
@@ -200,8 +206,9 @@ class TestGameState:
 
     def test_victory_condition_max_rounds(self):
         """Test victory when max rounds reached."""
+        generator = RandomBoardGenerator()
         players = [Player(f"Player {i}", ImpulsiveStrategy()) for i in range(4)]
-        board = generate_board()
+        board = generator.generate(20)
         state = GameState(players, board)
 
         # Set different balances
@@ -220,8 +227,9 @@ class TestGameState:
 
     def test_increment_round(self):
         """Test incrementing round counter."""
+        generator = RandomBoardGenerator()
         players = [Player(f"Player {i}", ImpulsiveStrategy()) for i in range(4)]
-        board = generate_board()
+        board = generator.generate(20)
         state = GameState(players, board)
 
         state.increment_round()

@@ -3,7 +3,7 @@ import pytest
 from app.game.models import Player, Property
 from app.game.engine import GameEngine
 from app.game.strategies import ImpulsiveStrategy, DemandingStrategy
-from app.utils.randomizer import generate_board, roll_dice
+from app.utils.implementations import RandomBoardGenerator, StandardDiceRoller
 
 
 class TestGameEngine:
@@ -12,7 +12,8 @@ class TestGameEngine:
     def test_engine_creation(self):
         """Test creating game engine."""
         players = [Player(f"Player {i}", ImpulsiveStrategy()) for i in range(4)]
-        board = generate_board()
+        generator = RandomBoardGenerator()
+        board = generator.generate(20)
         engine = GameEngine(players, board)
 
         assert len(engine.state.players) == 4
@@ -21,9 +22,11 @@ class TestGameEngine:
     def test_roll_dice(self):
         """Test dice rolling."""
         players = [Player("Test", ImpulsiveStrategy())]
-        board = generate_board()
+        generator = RandomBoardGenerator()
+        board = generator.generate(20)
         engine = GameEngine(players, board)
-        engine.set_dice_roller(roll_dice)
+        dice_roller = StandardDiceRoller()
+        engine.set_dice_roller(dice_roller.roll)
 
         # Roll dice multiple times and check range
         for _ in range(100):
@@ -33,9 +36,11 @@ class TestGameEngine:
     def test_play_turn_movement(self):
         """Test that a turn moves the player."""
         player = Player("Test", ImpulsiveStrategy(), initial_balance=1000)
-        board = generate_board()
+        generator = RandomBoardGenerator()
+        board = generator.generate(20)
         engine = GameEngine([player], board)
-        engine.set_dice_roller(roll_dice)
+        dice_roller = StandardDiceRoller()
+        engine.set_dice_roller(dice_roller.roll)
 
         initial_position = player.position
         engine.play_turn(player)
@@ -46,9 +51,11 @@ class TestGameEngine:
     def test_property_purchase_in_turn(self):
         """Test that player can buy property during turn."""
         player = Player("Test", ImpulsiveStrategy(), initial_balance=1000)
-        board = generate_board(num_properties=20)
+        generator = RandomBoardGenerator()
+        board = generator.generate(num_properties=20)
         engine = GameEngine([player], board)
-        engine.set_dice_roller(roll_dice)
+        dice_roller = StandardDiceRoller()
+        engine.set_dice_roller(dice_roller.roll)
 
         # Play several turns
         for _ in range(20):
@@ -59,10 +66,11 @@ class TestGameEngine:
 
     def test_rent_payment(self):
         """Test rent payment between players."""
+        generator = RandomBoardGenerator()
         player1 = Player("Player 1", ImpulsiveStrategy(), initial_balance=1000)
         player2 = Player("Player 2", ImpulsiveStrategy(), initial_balance=1000)
 
-        board = generate_board(num_properties=20)
+        board = generator.generate(num_properties=20)
         engine = GameEngine([player1, player2], board)
 
         # Have player1 own a property via board repository
@@ -90,7 +98,8 @@ class TestGameEngine:
     def test_player_elimination(self):
         """Test that players are eliminated when balance < 0."""
         player = Player("Test", ImpulsiveStrategy(), initial_balance=10)
-        board = generate_board()
+        generator = RandomBoardGenerator()
+        board = generator.generate(20)
         engine = GameEngine([player], board)
 
         player.pay_rent(50)  # Force negative balance
@@ -101,9 +110,11 @@ class TestGameEngine:
     def test_play_round(self):
         """Test playing a complete round."""
         players = [Player(f"Player {i}", ImpulsiveStrategy()) for i in range(4)]
-        board = generate_board()
+        generator = RandomBoardGenerator()
+        board = generator.generate(20)
         engine = GameEngine(players, board)
-        engine.set_dice_roller(roll_dice)
+        dice_roller = StandardDiceRoller()
+        engine.set_dice_roller(dice_roller.roll)
 
         initial_round = engine.state.round_count
         engine.play_round()
@@ -116,9 +127,11 @@ class TestGameEngine:
             Player("Player 1", ImpulsiveStrategy()),
             Player("Player 2", DemandingStrategy()),
         ]
-        board = generate_board()
+        generator = RandomBoardGenerator()
+        board = generator.generate(20)
         engine = GameEngine(players, board)
-        engine.set_dice_roller(roll_dice)
+        dice_roller = StandardDiceRoller()
+        engine.set_dice_roller(dice_roller.roll)
 
         final_state = engine.play_game()
 
@@ -131,9 +144,11 @@ class TestGameEngine:
     def test_get_game_result(self):
         """Test getting game result."""
         players = [Player(f"Player {i}", ImpulsiveStrategy()) for i in range(2)]
-        board = generate_board()
+        generator = RandomBoardGenerator()
+        board = generator.generate(20)
         engine = GameEngine(players, board)
-        engine.set_dice_roller(roll_dice)
+        dice_roller = StandardDiceRoller()
+        engine.set_dice_roller(dice_roller.roll)
 
         engine.play_game()
         result = engine.get_game_result()
