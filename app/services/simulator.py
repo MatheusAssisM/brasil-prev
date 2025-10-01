@@ -1,32 +1,62 @@
-from typing import Dict, Any
+from typing import Dict, Any, List
 from collections import defaultdict
 
-from app.game.factories import PlayerFactory
+from app.core.interfaces import SimulatorService, DiceRoller, BoardGenerator
+from app.game.models import Player
 from app.game.engine import GameEngine
-from app.utils.randomizer import generate_board, roll_dice
+from app.game.strategies import (
+    ImpulsiveStrategy,
+    DemandingStrategy,
+    CautiousStrategy,
+    RandomStrategy,
+)
+from app.core.config import GameConfig
 
 
-class GameSimulator:
+class GameSimulator(SimulatorService):
     """Service that orchestrates game simulations and formats results."""
 
-    @staticmethod
-    def run_single_simulation() -> Dict[str, Any]:
+    def __init__(
+        self,
+        players: List[Player],
+        board_generator: BoardGenerator,
+        dice_roller: DiceRoller
+    ):
         """
-        Run a single game simulation with default players.
+        Initialize simulator with dependencies.
+
+        Args:
+            players: List of players for the game
+            board_generator: Board generator instance
+            dice_roller: Dice roller instance
+        """
+        self.players = players
+        self.board_generator = board_generator
+        self.dice_roller = dice_roller
+
+    def run_single_simulation(self) -> Dict[str, Any]:
+        """
+        Run a single game simulation.
 
         Returns:
             Dictionary with complete game statistics
         """
-        players = PlayerFactory.create_default_players()
-        board = generate_board()
+        board = self.board_generator.generate(20)
+
+        players = [
+            Player("Impulsive Player", ImpulsiveStrategy(), GameConfig.INITIAL_BALANCE),
+            Player("Demanding Player", DemandingStrategy(GameConfig.DEMANDING_RENT_THRESHOLD), GameConfig.INITIAL_BALANCE),
+            Player("Cautious Player", CautiousStrategy(GameConfig.CAUTIOUS_RESERVE_THRESHOLD), GameConfig.INITIAL_BALANCE),
+            Player("Random Player", RandomStrategy(), GameConfig.INITIAL_BALANCE),
+        ]
+
         engine = GameEngine(players, board)
-        engine.set_dice_roller(roll_dice)
+        engine.set_dice_roller(self.dice_roller.roll)
 
         engine.play_game()
         return engine.get_game_result()
 
-    @staticmethod
-    def run_batch_simulation(num_simulations: int) -> Dict[str, Any]:
+    def run_batch_simulation(self, num_simulations: int) -> Dict[str, Any]:
         """
         Run multiple game simulations and aggregate statistics.
 
@@ -44,7 +74,7 @@ class GameSimulator:
 
         # Run simulations
         for _ in range(num_simulations):
-            result = GameSimulator.run_single_simulation()
+            result = self.run_single_simulation()
 
             total_rounds += result["rounds"]
             if result["timeout"]:

@@ -1,8 +1,9 @@
 from typing import List, Optional
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, Field
 
-from app.services.simulator import GameSimulator
+from app.core.interfaces import SimulatorService
+from app.core.dependencies import get_simulator_service
 
 router = APIRouter()
 
@@ -45,14 +46,16 @@ class BatchSimulationResult(BaseModel):
 
 # Routes
 @router.post("/game/simulate", response_model=GameResult, tags=["Simulation"])
-async def simulate_game():
+async def simulate_game(
+    simulator: SimulatorService = Depends(get_simulator_service)
+):
     """
     Run a single game simulation with 4 players using different strategies.
 
     Returns the winner strategy name and list of all player strategies.
     """
     try:
-        result = GameSimulator.run_single_simulation()
+        result = simulator.run_single_simulation()
 
         # Extract winner strategy (lowercase)
         winner_strategy = None
@@ -72,7 +75,10 @@ async def simulate_game():
 
 
 @router.post("/game/stats", response_model=BatchSimulationResult, tags=["Simulation"])
-async def run_batch_simulation(request: BatchSimulationRequest):
+async def run_batch_simulation(
+    request: BatchSimulationRequest,
+    simulator: SimulatorService = Depends(get_simulator_service)
+):
     """
     Run multiple game simulations and return aggregated statistics.
 
@@ -81,13 +87,14 @@ async def run_batch_simulation(request: BatchSimulationRequest):
 
     Args:
         request: BatchSimulationRequest with num_simulations parameter
+        simulator: SimulatorService instance (injected)
 
     Returns:
         Aggregated statistics including win rates per strategy,
         average rounds, timeout rates, and most successful strategy.
     """
     try:
-        result = GameSimulator.run_batch_simulation(request.num_simulations)
+        result = simulator.run_batch_simulation(request.num_simulations)
 
         return BatchSimulationResult(
             total_simulations=result["total_simulations"],
