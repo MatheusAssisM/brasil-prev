@@ -1,0 +1,27 @@
+[project]
+name = "monopoly-simulator-api"
+version = "1.0.0"
+description = "A simplified Monopoly-style board game simulation API with clean architecture"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.118.0",
+    "pydantic>=2.11.9",
+    "pydantic-settings>=2.0.0",
+    "uvicorn>=0.37.0",
+]
+
+[project.scripts]
+start = "app.main:start"
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1",
+    "pytest>=8.4.2",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
