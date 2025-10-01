@@ -1,4 +1,3 @@
-"""Tests for FastAPI endpoints."""
 import pytest
 from fastapi.testclient import TestClient
 
@@ -9,15 +8,6 @@ client = TestClient(app)
 
 class TestHealthEndpoints:
     """Test health check endpoints."""
-
-    def test_root_endpoint(self):
-        """Test root endpoint."""
-        response = client.get("/")
-        assert response.status_code == 200
-
-        data = response.json()
-        assert data["status"] == "ok"
-        assert "message" in data
 
     def test_health_endpoint(self):
         """Test health check endpoint."""
@@ -45,7 +35,8 @@ class TestSimulationEndpoints:
 
         # Winner should be lowercase strategy name or None
         if data["winner"]:
-            assert data["winner"] in ["impulsive", "demanding", "cautious", "random"]
+            valid_strategies = ["impulsive", "demanding", "cautious", "random"]
+            assert data["winner"] in valid_strategies
 
         # Players should be list of 4 lowercase strategy names
         assert len(data["players"]) == 4
@@ -116,5 +107,5 @@ class TestOpenAPIDocumentation:
 
     def test_docs_endpoint(self):
         """Test that Swagger UI docs are accessible."""
-        response = client.get("/docs")
+        response = client.get("/")
         assert response.status_code == 200

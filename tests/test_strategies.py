@@ -1,6 +1,3 @@
-"""Tests for player strategies."""
-import pytest
-
 from app.game.models import Player, Property
 from app.game.strategies import (
     ImpulsiveStrategy,

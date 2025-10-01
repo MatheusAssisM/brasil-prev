@@ -1,4 +1,3 @@
-"""Tests for domain models."""
 import pytest
 
 from app.game.models import Player, Property, Board, GameState
@@ -17,19 +16,21 @@ class TestProperty:
         assert prop.owner is None
 
     def test_property_ownership(self):
-        """Test property ownership."""
+        """Test property ownership (using immutable dataclass pattern)."""
         prop = Property(cost=100, rent=50)
         player = Player("Test", ImpulsiveStrategy())
 
         assert not prop.is_owned()
 
-        prop.set_owner(player)
-        assert prop.is_owned()
-        assert prop.owner == player
+        # Create new property with owner
+        prop_with_owner = prop.with_owner(player)
+        assert prop_with_owner.is_owned()
+        assert prop_with_owner.owner == player
 
-        prop.reset_owner()
-        assert not prop.is_owned()
-        assert prop.owner is None
+        # Reset owner
+        prop_without_owner = prop_with_owner.reset_owner()
+        assert not prop_without_owner.is_owned()
+        assert prop_without_owner.owner is None
 
 
 class TestPlayer:
@@ -81,7 +82,7 @@ class TestPlayer:
         assert result is True
         assert player.balance == 200
         assert len(player.properties) == 1
-        assert prop.owner == player
+        # Note: owner assignment is now handled by GameEngine/Board
 
     def test_player_pay_rent(self):
         """Test player paying rent."""
@@ -108,16 +109,15 @@ class TestPlayer:
         prop1 = Property(cost=100, rent=50)
         prop2 = Property(cost=100, rent=50)
 
-        prop1.set_owner(player)
-        prop2.set_owner(player)
+        # Manually add properties to player
         player.properties = [prop1, prop2]
 
-        player.eliminate()
+        released_properties = player.eliminate()
 
         assert player.is_active is False
         assert len(player.properties) == 0
-        assert prop1.owner is None
-        assert prop2.owner is None
+        assert len(released_properties) == 2
+        # Note: owner reset is now handled by GameEngine/Board repository
 
 
 class TestBoard:
@@ -128,14 +128,15 @@ class TestBoard:
         board = generate_board(num_properties=20)
 
         assert board.size() == 20
-        assert len(board.properties) == 20
+        # Board now uses repository pattern, access via get_property
 
     def test_board_properties_are_random(self):
         """Test that board generates properties with varying costs."""
         board = generate_board(num_properties=20)
 
-        costs = [prop.cost for prop in board.properties]
-        rents = [prop.rent for prop in board.properties]
+        # Access properties through repository
+        costs = [board.get_property(i).cost for i in range(board.size())]
+        rents = [board.get_property(i).rent for i in range(board.size())]
 
         # Check there's variety (not all the same)
         assert len(set(costs)) > 1

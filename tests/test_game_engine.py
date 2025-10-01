@@ -1,4 +1,3 @@
-"""Tests for game engine."""
 import pytest
 
 from app.game.models import Player, Property
@@ -66,10 +65,13 @@ class TestGameEngine:
         board = generate_board(num_properties=20)
         engine = GameEngine([player1, player2], board)
 
-        # Have player1 own a property
+        # Have player1 own a property via board repository
         prop = board.get_property(3)
-        prop.set_owner(player1)
+        board.set_property_owner(3, player1)
         player1.properties.append(prop)
+
+        # Get the property with updated owner
+        prop_with_owner = board.get_property(3)
 
         # Move player2 to that property
         initial_balance_p1 = player1.balance
@@ -78,7 +80,7 @@ class TestGameEngine:
         player2.position = 2
         player2.move(1, board.size())  # Now at position 3
 
-        engine._handle_property_landing(player2, prop)
+        engine._handle_property_landing(player2, prop_with_owner)
 
         # Player2 should have paid rent
         assert player2.balance == initial_balance_p2 - prop.rent
