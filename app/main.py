@@ -6,6 +6,11 @@ from fastapi.responses import JSONResponse
 
 from app.api.routes import router
 from app.core.config import settings
+from app.utils.logger import setup_logging, get_logger
+
+# Initialize logging
+setup_logging(settings.log_level)
+logger = get_logger(__name__)
 
 app = FastAPI(
     title=settings.app_name,
@@ -21,6 +26,27 @@ app = FastAPI(
 app.include_router(router)
 
 
+@app.on_event("startup")
+async def startup_event():
+    """Log application startup."""
+    logger.info(
+        "Application starting",
+        extra={
+            "app_name": settings.app_name,
+            "log_level": settings.log_level,
+            "debug": settings.debug,
+            "host": settings.api_host,
+            "port": settings.api_port
+        }
+    )
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Log application shutdown."""
+    logger.info("Application shutting down")
+
+
 @app.get("/health", tags=["Health"])
 async def health_check() -> JSONResponse:
     return JSONResponse(
@@ -34,6 +60,15 @@ async def health_check() -> JSONResponse:
 
 def start() -> None:
     """Start the FastAPI application with uvicorn."""
+    logger.info(
+        "Starting uvicorn server",
+        extra={
+            "host": settings.api_host,
+            "port": settings.api_port,
+            "reload": settings.debug
+        }
+    )
+
     uvicorn.run(
         "app.main:app",
         host=settings.api_host,
