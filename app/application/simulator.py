@@ -3,7 +3,6 @@ from collections import defaultdict
 
 from app.core.interfaces import SimulatorService, DiceRoller, BoardGenerator, Logger
 from app.core.exceptions import GameConfigurationError
-from app.domain.models import Player
 from app.domain.engine import GameEngine
 from app.domain.factories import PlayerFactory
 
@@ -40,6 +39,43 @@ class GameSimulator(SimulatorService):
 
         return result
 
+    def _aggregate_strategy_statistics(
+        self,
+        strategy_wins: Dict[str, int],
+        strategy_rounds_when_won: Dict[str, List[int]],
+        num_simulations: int,
+        total_timeouts: int,
+    ) -> List[Dict[str, Any]]:
+        """
+        Aggregate statistics for each strategy.
+
+        Args:
+            strategy_wins: Wins per strategy
+            strategy_rounds_when_won: Rounds when each strategy won
+            num_simulations: Total number of simulations
+            total_timeouts: Total number of timeouts
+
+        Returns:
+            List of strategy statistics dictionaries
+        """
+        strategy_stats = []
+        for strategy in ["impulsive", "demanding", "cautious", "random"]:
+            wins = strategy_wins[strategy]
+            win_rate = wins / num_simulations
+            rounds_list = strategy_rounds_when_won[strategy]
+            avg_rounds = sum(rounds_list) / len(rounds_list) if rounds_list else 0
+
+            strategy_stats.append(
+                {
+                    "strategy": strategy,
+                    "wins": wins,
+                    "win_rate": win_rate,
+                    "timeouts": total_timeouts,
+                    "avg_rounds_when_won": avg_rounds,
+                }
+            )
+        return strategy_stats
+
     def run_batch_simulation(self, num_simulations: int) -> Dict[str, Any]:
         """
         Run multiple game simulations and aggregate statistics.
@@ -62,7 +98,6 @@ class GameSimulator(SimulatorService):
 
         for _ in range(num_simulations):
             result = self.run_single_simulation()
-
             total_rounds += result["rounds"]
             if result["timeout"]:
                 total_timeouts += 1
@@ -75,24 +110,12 @@ class GameSimulator(SimulatorService):
                     strategy_wins[winner_player["strategy"]] += 1
                     strategy_rounds_when_won[winner_player["strategy"]].append(result["rounds"])
 
-        strategy_stats = []
-        for strategy in ["impulsive", "demanding", "cautious", "random"]:
-            wins = strategy_wins[strategy]
-            win_rate = wins / num_simulations
-            rounds_list = strategy_rounds_when_won[strategy]
-            avg_rounds = sum(rounds_list) / len(rounds_list) if rounds_list else 0
-
-            strategy_stats.append(
-                {
-                    "strategy": strategy,
-                    "wins": wins,
-                    "win_rate": win_rate,
-                    "timeouts": total_timeouts,
-                    "avg_rounds_when_won": avg_rounds,
-                }
-            )
+        strategy_stats = self._aggregate_strategy_statistics(
+            strategy_wins, strategy_rounds_when_won, num_simulations, total_timeouts
+        )
 
         most_winning = max(strategy_stats, key=lambda s: s["wins"])
+        most_winning_strategy = most_winning["strategy"] if most_winning["wins"] > 0 else None
 
         result = {
             "total_simulations": num_simulations,
@@ -100,7 +123,7 @@ class GameSimulator(SimulatorService):
             "timeout_rate": total_timeouts / num_simulations,
             "avg_rounds": total_rounds / num_simulations,
             "strategy_statistics": strategy_stats,
-            "most_winning_strategy": most_winning["strategy"] if most_winning["wins"] > 0 else None,
+            "most_winning_strategy": most_winning_strategy,
         }
 
         self.logger.info(
