@@ -38,5 +38,8 @@ class Settings(BaseSettings):
 
     doc_url: str = "/"
 
+    # Logging configuration
+    log_level: str = "INFO"  # DEBUG, INFO, WARNING, ERROR
+
 
 settings = Settings()
