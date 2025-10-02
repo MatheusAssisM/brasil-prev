@@ -1,7 +1,12 @@
 from typing import Callable, Dict, Any, List, Optional
+import uuid
 
 from app.game.models import Player, Board, GameState, Property
 from app.core.config import GameConfig
+from app.utils.logger import get_logger, set_game_context, add_game_context_to_logger
+
+logger = get_logger(__name__)
+add_game_context_to_logger(logger)
 
 
 class GameEngine:
@@ -23,6 +28,17 @@ class GameEngine:
             max_rounds=GameConfig.MAX_ROUNDS
         )
         self.dice_roller: Optional[Callable[[], int]] = None
+        self.game_id = str(uuid.uuid4())
+
+        logger.info(
+            "Game initialized",
+            extra={
+                "game_id": self.game_id,
+                "num_players": len(players),
+                "player_strategies": [p.strategy.get_name() for p in players],
+                "board_size": board.size()
+            }
+        )
 
     def set_dice_roller(self, dice_roller: Callable[[], int]) -> None:
         """Inject dice roller dependency."""
@@ -46,12 +62,28 @@ class GameEngine:
         if not player.is_active:
             return
 
+        old_position = player.position
+        old_balance = player.balance
+
         # Roll dice and move
         steps = self.roll_dice()
         new_position = player.move(
             steps,
             self.state.board.size(),
             GameConfig.ROUND_SALARY
+        )
+
+        logger.debug(
+            "Player turn",
+            extra={
+                "player": player.name,
+                "strategy": player.strategy.get_name(),
+                "dice_roll": steps,
+                "old_position": old_position,
+                "new_position": new_position,
+                "balance": player.balance,
+                "balance_change": player.balance - old_balance
+            }
         )
 
         # Get property at new position
@@ -62,6 +94,15 @@ class GameEngine:
 
         # Check if player is eliminated
         if player.balance < 0:
+            logger.info(
+                "Player eliminated",
+                extra={
+                    "player": player.name,
+                    "strategy": player.strategy.get_name(),
+                    "final_balance": player.balance,
+                    "properties_owned": len(player.properties)
+                }
+            )
             released_properties = player.eliminate()
             # Release all properties owned by eliminated player
             for prop in released_properties:
@@ -86,16 +127,46 @@ class GameEngine:
             if player.buy_property(property):
                 # Update ownership in the board repository
                 self.state.board.set_property_owner(player.position, player)
+                logger.debug(
+                    "Property purchased",
+                    extra={
+                        "player": player.name,
+                        "position": player.position,
+                        "property_cost": property.cost,
+                        "property_rent": property.rent,
+                        "balance_after": player.balance
+                    }
+                )
         elif property.owner != player and property.owner is not None:
             # Property is owned by another player - pay rent
             owner = property.owner
             player.pay_rent(property.rent)
             if owner.is_active:  # Only pay if owner is still active
                 owner.receive_rent(property.rent)
+            logger.debug(
+                "Rent paid",
+                extra={
+                    "payer": player.name,
+                    "owner": owner.name,
+                    "rent_amount": property.rent,
+                    "payer_balance": player.balance,
+                    "owner_balance": owner.balance
+                }
+            )
 
     def play_round(self) -> None:
         """Play a complete round where each active player takes a turn."""
+        set_game_context(game_id=self.game_id, round_number=self.state.round_count + 1)
+
         active_players = self.state.get_active_players()
+
+        logger.debug(
+            "Round started",
+            extra={
+                "active_players": len(active_players),
+                "player_names": [p.name for p in active_players]
+            }
+        )
 
         for player in active_players:
             self.play_turn(player)
@@ -109,9 +180,22 @@ class GameEngine:
         Returns:
             The final game state
         """
+        logger.info("Game started", extra={"game_id": self.game_id})
+
         while not self.state.game_over:
             self.play_round()
             self.state.check_victory_condition()
+
+        logger.info(
+            "Game finished",
+            extra={
+                "game_id": self.game_id,
+                "winner": self.state.winner.name if self.state.winner else None,
+                "total_rounds": self.state.round_count,
+                "timeout": self.state.round_count >= self.state.max_rounds,
+                "active_players": len(self.state.get_active_players())
+            }
+        )
 
         return self.state
 
