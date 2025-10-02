@@ -1,8 +1,6 @@
-import pytest
-
-from app.game.models import Player, Property, Board, GameState
-from app.game.strategies import ImpulsiveStrategy
-from app.utils.implementations import RandomBoardGenerator
+from app.domain.models import Player, Property, GameState
+from app.domain.strategies import ImpulsiveStrategy
+from app.infrastructure.generators.random import RandomBoardGenerator
 
 
 class TestProperty:

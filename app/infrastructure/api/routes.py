@@ -48,7 +48,9 @@ class BatchSimulationResult(BaseModel):
 
 # Routes
 @router.post("/game/simulate", response_model=GameResult, tags=["Simulation"])
-async def simulate_game(simulator: SimulatorService = Depends(get_simulator_service)):
+async def simulate_game(
+    simulator: SimulatorService = Depends(get_simulator_service),
+) -> GameResult:
     """
     Run a single game simulation with 4 players using different strategies.
 
@@ -73,13 +75,14 @@ async def simulate_game(simulator: SimulatorService = Depends(get_simulator_serv
         )
     except Exception as e:
         logger.error("Game simulation failed", extra={"error": str(e)}, exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Game simulation failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Game simulation failed: {str(e)}") from e
 
 
 @router.post("/game/stats", response_model=BatchSimulationResult, tags=["Simulation"])
 async def run_batch_simulation(
-    request: BatchSimulationRequest, simulator: SimulatorService = Depends(get_simulator_service)
-):
+    request: BatchSimulationRequest,
+    simulator: SimulatorService = Depends(get_simulator_service),
+) -> BatchSimulationResult:
     """
     Run multiple game simulations and return aggregated statistics.
 
@@ -113,4 +116,4 @@ async def run_batch_simulation(
             extra={"num_simulations": request.num_simulations, "error": str(e)},
             exc_info=True,
         )
-        raise HTTPException(status_code=500, detail=f"Batch simulation failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Batch simulation failed: {str(e)}") from e

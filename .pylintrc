@@ -14,6 +14,9 @@ disable=
     C0114,  # missing-module-docstring
     C0115,  # missing-class-docstring
     C0116,  # missing-function-docstring
+    W0107,  # unnecessary-pass (acceptable in abstract methods)
+    W0622,  # redefined-builtin (for parameter name 'property')
+    C0415,  # import-outside-toplevel (acceptable for avoiding circular imports)
 
 [FORMAT]
 max-line-length=100

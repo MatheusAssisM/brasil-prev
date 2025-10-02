@@ -1,9 +1,7 @@
-import pytest
-
-from app.game.models import Player, Property
-from app.game.engine import GameEngine
-from app.game.strategies import ImpulsiveStrategy, DemandingStrategy
-from app.utils.implementations import RandomBoardGenerator, StandardDiceRoller
+from app.domain.models import Player
+from app.domain.engine import GameEngine
+from app.domain.strategies import ImpulsiveStrategy, DemandingStrategy
+from app.infrastructure.generators.random import RandomBoardGenerator, StandardDiceRoller
 
 
 class TestGameEngine:
@@ -100,7 +98,7 @@ class TestGameEngine:
         player = Player("Test", ImpulsiveStrategy(), initial_balance=10)
         generator = RandomBoardGenerator()
         board = generator.generate(20)
-        engine = GameEngine([player], board)
+        GameEngine([player], board)
 
         player.pay_rent(50)  # Force negative balance
 

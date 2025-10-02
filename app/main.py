@@ -25,7 +25,7 @@ app.include_router(router)
 
 
 @app.on_event("shutdown")
-async def shutdown_event():
+async def shutdown_event() -> None:
     logger.info("Application shutting down")
 
 

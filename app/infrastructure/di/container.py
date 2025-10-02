@@ -1,10 +1,11 @@
 from functools import lru_cache
 
+from fastapi import Depends
+
 from app.core.interfaces import DiceRoller, BoardGenerator, SimulatorService, Logger
 from app.infrastructure.generators.random import StandardDiceRoller, RandomBoardGenerator
 from app.infrastructure.logging.logger import StructuredLogger
 from app.application.simulator import GameSimulator
-from fastapi import Depends
 
 
 @lru_cache()

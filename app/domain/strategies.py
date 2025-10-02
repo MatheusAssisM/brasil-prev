@@ -1,8 +1,12 @@
 from __future__ import annotations
 
 import random
+from typing import TYPE_CHECKING
 
 from app.core.interfaces import PurchaseStrategy
+
+if TYPE_CHECKING:
+    from app.domain.models import Player, Property
 
 
 class ImpulsiveStrategy(PurchaseStrategy):

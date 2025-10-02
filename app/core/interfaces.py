@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Dict, Any, List, Optional, Union
+from typing import TYPE_CHECKING, Dict, Any, List, Optional
+
+if TYPE_CHECKING:
+    from app.domain.models import Player, Property, Board
 
 
 class PurchaseStrategy(ABC):

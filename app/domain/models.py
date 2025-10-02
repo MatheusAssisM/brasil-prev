@@ -153,7 +153,7 @@ class Board:
         return self._repository.size()
 
     @property
-    def repository(self):
+    def repository(self) -> PropertyRepository:
         """Expose repository for advanced operations."""
         return self._repository
 
