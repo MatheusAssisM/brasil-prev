@@ -11,6 +11,9 @@ from app.game.strategies import (
     RandomStrategy,
 )
 from app.core.config import GameConfig
+from app.utils.logger import get_logger, clear_game_context
+
+logger = get_logger(__name__)
 
 
 class GameSimulator(SimulatorService):
@@ -41,6 +44,8 @@ class GameSimulator(SimulatorService):
         Returns:
             Dictionary with complete game statistics
         """
+        logger.debug("Starting single game simulation")
+
         board = self.board_generator.generate(20)
 
         players = [
@@ -54,7 +59,20 @@ class GameSimulator(SimulatorService):
         engine.set_dice_roller(self.dice_roller.roll)
 
         engine.play_game()
-        return engine.get_game_result()
+        result = engine.get_game_result()
+
+        clear_game_context()
+
+        logger.debug(
+            "Single game simulation completed",
+            extra={
+                "winner": result["winner"],
+                "rounds": result["rounds"],
+                "timeout": result["timeout"]
+            }
+        )
+
+        return result
 
     def run_batch_simulation(self, num_simulations: int) -> Dict[str, Any]:
         """
@@ -66,6 +84,11 @@ class GameSimulator(SimulatorService):
         Returns:
             Dictionary with aggregated statistics
         """
+        logger.info(
+            "Starting batch simulation",
+            extra={"num_simulations": num_simulations}
+        )
+
         # Track statistics
         strategy_wins = defaultdict(int)
         strategy_rounds_when_won = defaultdict(list)
@@ -73,7 +96,17 @@ class GameSimulator(SimulatorService):
         total_timeouts = 0
 
         # Run simulations
-        for _ in range(num_simulations):
+        for i in range(num_simulations):
+            if (i + 1) % 100 == 0:
+                logger.info(
+                    "Batch simulation progress",
+                    extra={
+                        "completed": i + 1,
+                        "total": num_simulations,
+                        "progress_pct": ((i + 1) / num_simulations) * 100
+                    }
+                )
+
             result = self.run_single_simulation()
 
             total_rounds += result["rounds"]
@@ -111,7 +144,7 @@ class GameSimulator(SimulatorService):
         # Determine most winning strategy
         most_winning = max(strategy_stats, key=lambda s: s["wins"])
 
-        return {
+        result = {
             "total_simulations": num_simulations,
             "timeouts": total_timeouts,
             "timeout_rate": total_timeouts / num_simulations if num_simulations > 0 else 0,
@@ -119,3 +152,15 @@ class GameSimulator(SimulatorService):
             "strategy_statistics": strategy_stats,
             "most_winning_strategy": most_winning["strategy"] if most_winning["wins"] > 0 else None,
         }
+
+        logger.info(
+            "Batch simulation completed",
+            extra={
+                "num_simulations": num_simulations,
+                "most_winning_strategy": result["most_winning_strategy"],
+                "avg_rounds": result["avg_rounds"],
+                "timeout_rate": result["timeout_rate"]
+            }
+        )
+
+        return result
