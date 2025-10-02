@@ -44,7 +44,6 @@ class GameSimulator(SimulatorService):
         Returns:
             Dictionary with complete game statistics
         """
-        logger.debug("Starting single game simulation")
 
         board = self.board_generator.generate(20)
 
@@ -57,20 +56,9 @@ class GameSimulator(SimulatorService):
 
         engine = GameEngine(players, board)
         engine.set_dice_roller(self.dice_roller.roll)
-
         engine.play_game()
         result = engine.get_game_result()
-
         clear_game_context()
-
-        logger.debug(
-            "Single game simulation completed",
-            extra={
-                "winner": result["winner"],
-                "rounds": result["rounds"],
-                "timeout": result["timeout"]
-            }
-        )
 
         return result
 
@@ -89,24 +77,12 @@ class GameSimulator(SimulatorService):
             extra={"num_simulations": num_simulations}
         )
 
-        # Track statistics
         strategy_wins = defaultdict(int)
         strategy_rounds_when_won = defaultdict(list)
         total_rounds = 0
         total_timeouts = 0
 
-        # Run simulations
         for i in range(num_simulations):
-            if (i + 1) % 100 == 0:
-                logger.info(
-                    "Batch simulation progress",
-                    extra={
-                        "completed": i + 1,
-                        "total": num_simulations,
-                        "progress_pct": ((i + 1) / num_simulations) * 100
-                    }
-                )
-
             result = self.run_single_simulation()
 
             total_rounds += result["rounds"]
@@ -114,7 +90,6 @@ class GameSimulator(SimulatorService):
                 total_timeouts += 1
 
             if result["winner"]:
-                # Find winner's strategy
                 winner_player = next(
                     p for p in result["players"] if p["name"] == result["winner"]
                 )

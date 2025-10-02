@@ -56,34 +56,21 @@ async def simulate_game(
 
     Returns the winner strategy name and list of all player strategies.
     """
-    logger.info("Received request for single game simulation")
 
     try:
         result = simulator.run_single_simulation()
 
-        # Extract winner strategy (lowercase)
         winner_strategy = None
         if result["winner"]:
             winner_player = next(p for p in result["players"] if p["name"] == result["winner"])
             winner_strategy = winner_player["strategy"]
 
-        # Extract player strategies in order (lowercase)
         player_strategies = [p["strategy"] for p in result["players"]]
 
-        response = GameResult(
+        return GameResult(
             winner=winner_strategy,
             players=player_strategies,
         )
-
-        logger.info(
-            "Single game simulation request completed",
-            extra={
-                "winner": winner_strategy,
-                "rounds": result["rounds"]
-            }
-        )
-
-        return response
     except Exception as e:
         logger.error(
             "Game simulation failed",
@@ -105,15 +92,12 @@ async def run_batch_simulation(
     over many games and understanding average game characteristics.
 
     """
-    logger.info(
-        "Received request for batch simulation",
-        extra={"num_simulations": request.num_simulations}
-    )
+  
 
     try:
         result = simulator.run_batch_simulation(request.num_simulations)
 
-        response = BatchSimulationResult(
+        return BatchSimulationResult(
             total_simulations=result["total_simulations"],
             timeouts=result["timeouts"],
             timeout_rate=result["timeout_rate"],
@@ -130,16 +114,6 @@ async def run_batch_simulation(
             ],
             most_winning_strategy=result["most_winning_strategy"],
         )
-
-        logger.info(
-            "Batch simulation request completed",
-            extra={
-                "num_simulations": request.num_simulations,
-                "most_winning_strategy": result["most_winning_strategy"]
-            }
-        )
-
-        return response
     except Exception as e:
         logger.error(
             "Batch simulation failed",

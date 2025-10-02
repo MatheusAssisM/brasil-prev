@@ -26,24 +26,8 @@ app = FastAPI(
 app.include_router(router)
 
 
-@app.on_event("startup")
-async def startup_event():
-    """Log application startup."""
-    logger.info(
-        "Application starting",
-        extra={
-            "app_name": settings.app_name,
-            "log_level": settings.log_level,
-            "debug": settings.debug,
-            "host": settings.api_host,
-            "port": settings.api_port
-        }
-    )
-
-
 @app.on_event("shutdown")
 async def shutdown_event():
-    """Log application shutdown."""
     logger.info("Application shutting down")
 
 
@@ -59,16 +43,6 @@ async def health_check() -> JSONResponse:
 
 
 def start() -> None:
-    """Start the FastAPI application with uvicorn."""
-    logger.info(
-        "Starting uvicorn server",
-        extra={
-            "host": settings.api_host,
-            "port": settings.api_port,
-            "reload": settings.debug
-        }
-    )
-
     uvicorn.run(
         "app.main:app",
         host=settings.api_host,
