@@ -3,7 +3,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, Field
 
 from app.core.interfaces import SimulatorService
-from app.dependencies import get_simulator_service, get_logger
+from app.infrastructure.di.container import get_simulator_service, get_logger
 
 router = APIRouter()
 logger = get_logger("app.infrastructure.api.routes")

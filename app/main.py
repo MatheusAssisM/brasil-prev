@@ -5,20 +5,20 @@ from fastapi.responses import JSONResponse
 from app.infrastructure.api.routes import router
 from app.core.config import settings
 from app.infrastructure.logging.logger import setup_logging
-from app.dependencies import get_logger
+from app.infrastructure.di.container import get_logger
 
 setup_logging(settings.log_level)
 logger = get_logger("app.main")
 
 app = FastAPI(
-    title=settings.app_name,
+    title=settings.APP_NAME,
     description=(
         "A simplified Monopoly-style board game simulation API "
         "with clean architecture and strategy pattern"
     ),
     version="1.0.0",
-    debug=settings.debug,
-    docs_url=settings.doc_url
+    debug=settings.DEBUG,
+    docs_url=settings.DOC_URL
 )
 
 app.include_router(router)
@@ -43,9 +43,9 @@ async def health_check() -> JSONResponse:
 def start() -> None:
     uvicorn.run(
         "app.main:app",
-        host=settings.api_host,
-        port=settings.api_port,
-        reload=settings.debug,
+        host=settings.API_HOST,
+        port=settings.API_PORT,
+        reload=settings.DEBUG,
     )
 
 

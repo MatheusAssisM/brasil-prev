@@ -26,19 +26,14 @@ class GameConfig:
 class Settings(BaseSettings):
     """Application settings (can be overridden via environment variables)."""
 
-    model_config = {
-        "env_prefix": "MONOPOLY_",
-        "case_sensitive": False,
-    }
+    APP_NAME: str = "Brasil Prev - Monopoly Simulator API"
+    DEBUG: bool = False
+    API_HOST: str = "0.0.0.0"
+    API_PORT: int = 8000
 
-    app_name: str = "Brasil Prev - Monopoly Simulator API"
-    debug: bool = False
-    api_host: str = "0.0.0.0"
-    api_port: int = 8000
+    DOC_URL: str = "/"
 
-    doc_url: str = "/"
-
-    log_level: str = "INFO"
+    LOG_LEVEL: str = "WARNING"
 
 
 settings = Settings()
