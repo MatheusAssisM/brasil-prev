@@ -1,152 +1,69 @@
-# Step-by-Step Execution Guide
+# Como Rodar a Aplicação
 
-This document provides a comprehensive guide to understanding, running, and testing the Monopoly Simulator API.
+## Monopoly Simulator API
 
-## Table of Contents
-1. [Project Overview](#project-overview)
-2. [Architecture](#architecture)
-3. [Installation](#installation)
-4. [Running the Application](#running-the-application)
-5. [API Endpoints](#api-endpoints)
-6. [Running Tests](#running-tests)
-7. [Code Walkthrough](#code-walkthrough)
-8. [Design Decisions](#design-decisions)
+API REST que simula partidas de um jogo estilo Monopoly com 4 jogadores usando diferentes estratégias de compra.
 
-## Project Overview
+---
 
-This is a simplified Monopoly-style board game simulator built with clean architecture principles. The system simulates matches between 4 players, each using a different strategy for property purchases.
+## 🚀 Execução Rápida (Docker - Recomendado)
 
-### Game Rules
+```bash
+# 1. Iniciar a aplicação
+docker-compose up --build
 
-- **Board**: 20 properties with random purchase costs (50-200) and rents (10-100)
-- **Players**: 4 players starting with 300 balance
-- **Turns**:
-  - Roll 1d6 dice
-  - Move clockwise around board
-  - Land on property → buy (if unowned) or pay rent (if owned by other player)
-  - Complete a round → earn 100 salary
-- **Elimination**: Balance < 0 → player eliminated, properties released
-- **Victory**: Last player standing OR highest balance after 1000 rounds
-
-### Player Strategies
-
-1. **Impulsive**: Always buys when possible
-2. **Demanding**: Only buys if rent > 50
-3. **Cautious**: Only buys if balance after purchase ≥ 80
-4. **Random**: 50% chance to buy
-
-## Architecture
-
-### Layer Organization
-
-```
-app/
-├── core/           # Contracts, interfaces, configuration
-│   ├── interfaces.py   # PurchaseStrategy (Strategy interface)
-│   └── config.py       # GameConfig, Settings
-│
-├── game/           # Domain logic (business rules)
-│   ├── models.py       # Property (dataclass), Player, Board, GameState
-│   ├── strategies.py   # ImpulsiveStrategy, DemandingStrategy, etc.
-│   ├── factories.py    # PlayerFactory (Factory pattern)
-│   ├── repositories.py # PropertyRepository (Repository pattern)
-│   └── engine.py       # GameEngine (turn execution, rule enforcement)
-│
-├── services/       # Application services (use cases)
-│   └── simulator.py    # GameSimulator (orchestrates simulations)
-│
-├── api/            # HTTP interface (infrastructure)
-│   └── routes.py       # FastAPI endpoints, Pydantic models
-│
-├── utils/          # Helper utilities
-│   └── randomizer.py   # Dice rolling, board generation
-│
-└── main.py         # FastAPI app entrypoint
+# 2. Acessar a API
+# API: http://localhost:8000
+# Documentação interativa: http://localhost:8000
 ```
 
-### Key Design Patterns
+**Parar a aplicação:**
+```bash
+docker-compose down
+```
 
-- **Strategy Pattern**: Player behaviors are decoupled via `PurchaseStrategy` interface
-- **Factory Pattern**: `PlayerFactory` centralizes player creation with different strategies
-- **Repository Pattern**: `InMemoryPropertyRepository` isolates property storage from business logic
-- **Immutable Data**: `Property` is a frozen dataclass preventing accidental mutations
-- **Dependency Injection**: Dice roller can be injected into GameEngine (facilitates testing)
-- **Type Hints**: Comprehensive typing support throughout the codebase
-- **Clean Architecture**: Domain logic is independent of infrastructure concerns
+---
 
-## Installation
+## 📦 Execução Local (sem Docker)
 
-### Prerequisites
-
+### Pré-requisitos
 - Python 3.12+
 - [uv](https://github.com/astral-sh/uv) package manager
 
-### Setup Steps
+### Instalação e Execução
 
 ```bash
-# 1. Clone repository
-git clone <repository-url>
-cd brasil-prev
-
-# 2. Install dependencies
+# 1. Instalar dependências
 uv sync
-
-# 3. Install package in editable mode
 uv pip install -e .
-```
 
-## Running the Application
-
-### Start the API Server
-
-```bash
-# Using the configured script
+# 2. Iniciar a aplicação
 uv run start
 
-# OR using uvicorn directly
-uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+# OU usar Make
+make install
+make run
+
+# 3. Acessar a API
+# API: http://localhost:8000
+# Documentação interativa: http://localhost:8000
 ```
 
-The API will be available at:
-- **Base URL**: http://localhost:8000
-- **Interactive Docs**: http://localhost:8000/docs
-- **OpenAPI Schema**: http://localhost:8000/openapi.json
+---
 
-## API Endpoints
+## 🎮 Como Usar a API
 
-### 1. Health Check
-
-```bash
-GET /
-GET /health
-```
-
-**Example:**
+### 1. Verificar Health
 ```bash
 curl http://localhost:8000/health
 ```
 
-**Response:**
-```json
-{
-  "status": "healthy",
-  "service": "monopoly-simulator-api",
-  "version": "1.0.0"
-}
-```
-
-### 2. Simulate Single Game
-
-```bash
-POST /game/simulate
-```
-
-**Example:**
+### 2. Simular Uma Partida
 ```bash
 curl -X POST http://localhost:8000/game/simulate
 ```
 
-**Response:**
+**Resposta:**
 ```json
 {
   "winner": "impulsive",
@@ -154,25 +71,14 @@ curl -X POST http://localhost:8000/game/simulate
 }
 ```
 
-### 3. Batch Simulation (Statistics)
-
-```bash
-POST /game/stats
-Content-Type: application/json
-
-{
-  "num_simulations": 300
-}
-```
-
-**Example:**
+### 3. Executar Simulação em Lote (Estatísticas)
 ```bash
 curl -X POST http://localhost:8000/game/stats \
   -H "Content-Type: application/json" \
   -d '{"num_simulations": 300}'
 ```
 
-**Response:**
+**Resposta:**
 ```json
 {
   "total_simulations": 300,
@@ -186,309 +92,139 @@ curl -X POST http://localhost:8000/game/stats \
       "win_rate": 0.42,
       "timeouts": 12,
       "avg_rounds_when_won": 287.5
-    },
-    ...
+    }
   ],
   "most_winning_strategy": "impulsive"
 }
 ```
 
-## Running Tests
+---
 
-### Run All Tests
+## 🧪 Testes
 
+### Com Docker
 ```bash
-uv run pytest
+docker-compose run --rm api pytest -v
 ```
 
-### Run with Verbose Output
-
+### Sem Docker
 ```bash
+# Rodar todos os testes
 uv run pytest -v
-```
 
-### Run Specific Test File
-
-```bash
+# Rodar arquivo específico
 uv run pytest tests/test_strategies.py
-uv run pytest tests/test_game_engine.py
-uv run pytest tests/test_api.py
-```
 
-### Run with Coverage
-
-```bash
+# Com cobertura
 uv run pytest --cov=app --cov-report=html
+
+# OU usar Make
+make test
 ```
-
-### Test Organization
-
-- **test_strategies.py**: Unit tests for each strategy implementation
-- **test_domain.py**: Unit tests for domain models (Property, Player, Board, GameState)
-- **test_game_engine.py**: Unit tests for game engine logic and rule enforcement
-- **test_api.py**: Integration tests for API endpoints
-
-## Code Walkthrough
-
-### 1. Starting Point: Main Entry
-
-**File**: `app/main.py`
-
-```python
-from fastapi import FastAPI
-from app.api.routes import router
-
-app = FastAPI(...)
-app.include_router(router)  # Register API routes
-```
-
-The FastAPI application is created and routes are registered from `app/api/routes.py`.
-
-### 2. API Layer
-
-**File**: `app/api/routes.py`
-
-```python
-@router.post("/game/simulate", response_model=GameResult)
-async def simulate_game():
-    result = GameSimulator.run_single_simulation()
-    return GameResult(...)
-```
-
-Routes delegate to `GameSimulator` service and return Pydantic-validated responses.
-
-### 3. Service Layer
-
-**File**: `app/services/simulator.py`
-
-```python
-class GameSimulator:
-    @staticmethod
-    def run_single_simulation() -> dict:
-        players = GameSimulator.create_default_players()
-        board = generate_board()
-        engine = GameEngine(players, board)
-        engine.set_dice_roller(roll_dice)
-        engine.play_game()
-        return engine.get_game_result()
-```
-
-The simulator orchestrates:
-1. Creating players with strategies
-2. Generating a random board
-3. Running the game engine
-4. Formatting results
-
-### 4. Game Engine
-
-**File**: `app/game/engine.py`
-
-```python
-class GameEngine:
-    def play_game(self) -> GameState:
-        while not self.state.game_over:
-            self.play_round()
-            self.state.check_victory_condition()
-        return self.state
-
-    def play_turn(self, player: Player) -> None:
-        steps = self.roll_dice()
-        player.move(steps, self.state.board.size())
-        property = self.state.board.get_property(player.position)
-        self._handle_property_landing(player, property)
-```
-
-The engine enforces all game rules:
-- Turn execution (dice roll, movement, property interaction)
-- Round completion (all players take turns)
-- Victory condition checking
-
-### 5. Domain Models
-
-**File**: `app/game/models.py`
-
-```python
-class Player:
-    def buy_property(self, property: Property) -> bool:
-        if not self.can_buy(property.cost):
-            return False
-        if self.strategy.should_buy(self, property):  # Strategy decides!
-            self.balance -= property.cost
-            ...
-            return True
-        return False
-```
-
-**Key insight**: Player delegates decision to its `strategy`, following the Strategy Pattern.
-
-### 6. Strategy Implementation
-
-**File**: `app/game/strategies.py`
-
-```python
-class ImpulsiveStrategy(PurchaseStrategy):
-    def should_buy(self, player: Player, property: Property) -> bool:
-        return True  # Always buy!
-
-class DemandingStrategy(PurchaseStrategy):
-    def should_buy(self, player: Player, property: Property) -> bool:
-        return property.rent > self.rent_threshold  # Conditional
-
-    def get_name(self) -> str:
-        return "demanding"
-```
-
-Each strategy implements `PurchaseStrategy` interface with pure decision logic—no access to Player internals.
-
-### 7. Factory Pattern
-
-**File**: `app/game/factories.py`
-
-```python
-class PlayerFactory:
-    @staticmethod
-    def create_impulsive_player(name: str = "Impulsive Player",
-                                balance: int = 300) -> Player:
-        return Player(name, ImpulsiveStrategy(), balance)
-
-    @staticmethod
-    def create_default_players() -> List[Player]:
-        return [
-            PlayerFactory.create_impulsive_player(),
-            PlayerFactory.create_demanding_player(),
-            PlayerFactory.create_cautious_player(),
-            PlayerFactory.create_random_player(),
-        ]
-```
-
-The factory encapsulates player creation logic and ensures consistent initialization.
-
-### 8. Repository Pattern
-
-**File**: `app/game/repositories.py`
-
-```python
-class InMemoryPropertyRepository(PropertyRepository):
-    def get_property(self, position: int) -> Property:
-        base_property = self._properties[position]
-        current_owner = self._owners[position]
-        return base_property.with_owner(current_owner)
-
-    def set_owner(self, position: int, player: Optional[Player]) -> None:
-        self._owners[position] = player
-```
-
-The repository separates property data storage from business logic, making it easy to swap implementations.
-
-### 9. Immutable Property (Dataclass)
-
-**File**: `app/game/models.py`
-
-```python
-@dataclass(frozen=True)
-class Property:
-    cost: int
-    rent: int
-    owner: Optional['Player'] = field(default=None, compare=False)
-
-    def with_owner(self, player: Optional['Player']) -> 'Property':
-        return Property(cost=self.cost, rent=self.rent, owner=player)
-```
-
-Properties are immutable—ownership changes create new instances instead of mutating.
-
-## Design Decisions
-
-### 1. Why Strategy Pattern?
-
-**Problem**: Different players need different behaviors without coupling behavior to Player class.
-
-**Solution**: Extract behavior to separate strategy classes implementing a common interface.
-
-**Benefits**:
-- Easy to add new strategies without modifying Player
-- Strategies are independently testable
-- Follows Open/Closed Principle
-
-### 2. Why Separate Randomizer Utility?
-
-**Reasoning**:
-- Centralizes all randomization logic
-- Makes testing easier (can mock dice rolls)
-- GameEngine doesn't depend directly on `random` module
-
-### 3. Why Inject Dice Roller?
-
-**Reasoning**:
-- Allows deterministic testing (inject custom dice roller)
-- Follows Dependency Inversion Principle
-- Engine doesn't know _how_ dice are rolled, just _that_ they are
-
-### 4. Why Separate GameState from GameEngine?
-
-**Reasoning**:
-- GameState is pure data (players, board, round count)
-- GameEngine contains behavior (executing turns, enforcing rules)
-- Separation of concerns: state management vs. game logic
-
-### 5. Why Domain Models Don't Know About API?
-
-**Reasoning**:
-- Domain logic should be independent of delivery mechanism
-- Models can be reused in CLI, GUI, or other interfaces
-- Follows Clean Architecture: domain at the center, infrastructure at edges
-
-### 6. Why Factory Pattern?
-
-**Reasoning**:
-- Centralizes player creation logic in one place
-- Encapsulates strategy instantiation details
-- Makes it easy to change default configurations
-- Consistent player creation across the application
-- Follows Single Responsibility Principle
-
-### 7. Why Repository Pattern?
-
-**Reasoning**:
-- Separates data access logic from business logic
-- Makes it easy to swap storage implementations (in-memory → database)
-- Provides clean interface for querying and managing entities
-- Centralizes property ownership management
-- Follows Dependency Inversion Principle
-
-### 8. Why Immutable Dataclasses?
-
-**Reasoning**:
-- Prevents accidental mutations and side effects
-- Makes code more predictable and easier to debug
-- Thread-safe by default
-- Encourages functional programming patterns
-- Clearly separates data from behavior
-
-### 9. Why Comprehensive Type Hints?
-
-**Reasoning**:
-- Improves IDE support and autocomplete
-- Catches type errors early (with mypy/pylance)
-- Serves as inline documentation
-- Makes refactoring safer
-- Improves code maintainability
-
-## Conclusion
-
-This implementation demonstrates:
-- **Clean Architecture**: Clear separation between domain, application, and infrastructure layers
-- **Strategy Pattern**: Behavior encapsulation and polymorphism
-- **Testability**: Comprehensive test coverage with 44 tests
-- **Extensibility**: Easy to add new strategies, rules, or interfaces
-
-The codebase prioritizes:
-1. Readability
-2. Maintainability
-3. Testability
-4. Adherence to SOLID principles
 
 ---
 
-**Generated**: 2025-01-01
-**Version**: 1.0.0
+## ⚙️ Configuração (Variáveis de Ambiente)
+
+Você pode configurar a aplicação através de variáveis de ambiente com prefixo `MONOPOLY_`:
+
+| Variável | Padrão | Descrição |
+|----------|--------|-----------|
+| `MONOPOLY_DEBUG` | `false` | Modo debug (hot reload) |
+| `MONOPOLY_LOG_LEVEL` | `WARNING` | Nível de log (DEBUG, INFO, WARNING, ERROR) |
+| `MONOPOLY_API_HOST` | `0.0.0.0` | Host da API |
+| `MONOPOLY_API_PORT` | `8000` | Porta da API |
+
+**Exemplo Docker:**
+```bash
+# Edite docker-compose.yml e ajuste as variáveis de ambiente
+```
+
+**Exemplo Local:**
+```bash
+MONOPOLY_LOG_LEVEL=DEBUG uv run start
+```
+
+---
+
+## 📋 Regras do Jogo
+
+- **Tabuleiro**: 20 propriedades com custos (50-200) e aluguéis (10-100) aleatórios
+- **Jogadores**: 4 jogadores começam com saldo de 300
+- **Turnos**:
+  - Rolar 1d6
+  - Mover no sentido horário
+  - Ao cair em propriedade → comprar (se livre) ou pagar aluguel (se ocupada)
+  - Completar uma volta → ganhar salário de 100
+- **Eliminação**: Saldo < 0 → jogador eliminado, propriedades liberadas
+- **Vitória**: Último jogador restante OU maior saldo após 1000 rodadas
+
+### Estratégias dos Jogadores
+
+1. **Impulsivo**: Sempre compra quando possível
+2. **Exigente**: Só compra se aluguel > 50
+3. **Cauteloso**: Só compra se saldo após compra ≥ 80
+4. **Aleatório**: 50% de chance de comprar
+
+---
+
+## 🏗️ Arquitetura (Resumo)
+
+### Organização em Camadas
+
+```
+app/
+├── core/              # Contratos e configurações
+│   ├── interfaces.py  # Interfaces abstratas (Strategy, Repository, etc.)
+│   └── config.py      # Configurações do jogo e aplicação
+├── domain/            # Lógica de negócio
+│   ├── models.py      # Entidades (Property, Player, Board, GameState)
+│   ├── strategies.py  # Implementações de estratégias
+│   └── engine.py      # Motor do jogo (regras e execução)
+├── application/       # Casos de uso
+│   └── simulator.py   # Orquestração de simulações
+├── infrastructure/    # Camada de infraestrutura
+│   ├── api/           # Endpoints FastAPI
+│   └── repositories/  # Implementações de repositórios
+└── utils/             # Utilitários
+```
+
+### Design Patterns Utilizados
+
+- **Strategy Pattern**: Comportamentos de compra encapsulados
+- **Factory Pattern**: Criação centralizada de jogadores
+- **Repository Pattern**: Abstração de armazenamento
+- **Dependency Injection**: Via FastAPI Depends()
+- **Clean Architecture**: Separação em camadas, domínio independente
+
+### Princípios SOLID
+
+- **Dependency Inversion**: Todas as dependências apontam para abstrações (`app/core/interfaces.py`)
+- **Single Responsibility**: Cada classe tem uma responsabilidade única
+- **Open/Closed**: Extensível via estratégias, sem modificar código existente
+
+---
+
+## 📝 Logs Estruturados
+
+A aplicação usa logs JSON estruturados para observabilidade:
+
+```bash
+# Executar com logs DEBUG
+MONOPOLY_LOG_LEVEL=DEBUG docker-compose up
+
+# Filtrar logs de um jogo específico
+docker-compose logs | grep "game_id.*abc123"
+
+# Analisar logs com jq
+docker-compose logs | jq 'select(.level == "ERROR")'
+```
+
+**Campos de log:**
+- `timestamp`, `level`, `logger`, `module`, `function`, `message`
+- `game_id`, `round_number` (contexto do jogo)
+
+---
+
+**Versão**: 1.0.0
+**Gerado**: 2025-10-02
