@@ -205,26 +205,5 @@ app/
 
 ---
 
-## 📝 Logs Estruturados
-
-A aplicação usa logs JSON estruturados para observabilidade:
-
-```bash
-# Executar com logs DEBUG
-MONOPOLY_LOG_LEVEL=DEBUG docker-compose up
-
-# Filtrar logs de um jogo específico
-docker-compose logs | grep "game_id.*abc123"
-
-# Analisar logs com jq
-docker-compose logs | jq 'select(.level == "ERROR")'
-```
-
-**Campos de log:**
-- `timestamp`, `level`, `logger`, `module`, `function`, `message`
-- `game_id`, `round_number` (contexto do jogo)
-
----
-
 **Versão**: 1.0.0
 **Gerado**: 2025-10-02
