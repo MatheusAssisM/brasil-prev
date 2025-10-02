@@ -1,4 +1,4 @@
-.PHONY: help install test run clean format lint typecheck quality setup-dev
+.PHONY: help install test run clean format lint typecheck quality setup-dev coverage
 
 help:
 	@echo "Brasil Prev - Monopoly Game Simulator"
@@ -7,6 +7,7 @@ help:
 	@echo "  make install    - Install dependencies and project"
 	@echo "  make setup-dev  - Setup development environment (deps + hooks)"
 	@echo "  make test       - Run tests"
+	@echo "  make coverage   - Run tests with coverage report"
 	@echo "  make run        - Start the API server"
 	@echo "  make format     - Format code with black"
 	@echo "  make lint       - Run flake8 and pylint"
@@ -23,6 +24,11 @@ setup-dev:
 
 test:
 	uv run pytest -v
+
+coverage:
+	uv run pytest --cov=app --cov-report=term-missing --cov-report=html
+	@echo ""
+	@echo "Coverage report generated in htmlcov/index.html"
 
 run:
 	uv run start
