@@ -79,8 +79,7 @@ addopts = "-v --strict-markers"
 [tool.coverage.run]
 source = ["app"]
 omit = [
-    "app/__init__.py",
-    "app/*/__init__.py",
+    "app/**/__init__.py",
     "app/main.py",
     "app/core/config.py",
 ]
