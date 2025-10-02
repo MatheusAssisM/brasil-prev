@@ -145,6 +145,21 @@ Visit `http://localhost:8000/docs` for Swagger UI documentation.
 
 ## Development
 
+### Quick Setup for New Developers
+
+```bash
+# Automated setup (installs dependencies + configures pre-push hooks)
+./setup-dev.sh
+
+# OR using Make
+make setup-dev
+```
+
+This will:
+- Install all dependencies (including dev tools)
+- Configure pre-push hooks for code quality checks
+- Run initial formatting and quality checks
+
 ### Run Tests
 
 ```bash
@@ -152,10 +167,71 @@ Visit `http://localhost:8000/docs` for Swagger UI documentation.
 uv run pytest
 
 # Run with coverage
-uv run pytest --cov=brasil_prev --cov-report=html
+uv run pytest --cov=app --cov-report=html
 
 # Run specific test file
 uv run pytest tests/test_strategies.py
+
+# OR using Make
+make test
+```
+
+### Code Quality Tools
+
+This project uses multiple tools to ensure code quality:
+
+#### Formatter
+- **Black**: Opinionated code formatter
+```bash
+# Format all code
+uv run black app/ tests/
+
+# OR using Make
+make format
+```
+
+#### Linters
+- **Flake8**: Style guide enforcement
+- **Pylint**: Code analysis for bugs and quality
+```bash
+# Run both linters
+uv run flake8 app/ tests/
+uv run pylint app/ --recursive=y
+
+# OR using Make
+make lint
+```
+
+#### Type Checker
+- **MyPy**: Static type checking
+```bash
+# Check types
+uv run mypy app/
+
+# OR using Make
+make typecheck
+```
+
+#### Run All Quality Checks
+```bash
+# Format + Lint + Type Check + Tests
+make quality
+```
+
+### Pre-push Hook
+
+A pre-push git hook is automatically configured via `./setup-dev.sh`. It runs:
+1. Black (format check)
+2. Flake8
+3. Pylint
+4. MyPy
+5. Pytest
+
+If any check fails, the push is blocked. This ensures all code pushed to the repository meets quality standards.
+
+**To bypass the hook** (not recommended):
+```bash
+git push --no-verify
 ```
 
 ## Architecture Decisions

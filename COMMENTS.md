@@ -124,6 +124,67 @@ make test
 
 ---
 
+## 💻 Desenvolvimento
+
+### Setup Rápido para Desenvolvedores
+
+Se você está contribuindo ou desenvolvendo o projeto:
+
+```bash
+# Setup automatizado (recomendado)
+./setup-dev.sh
+
+# OU
+make setup-dev
+```
+
+**O que isso faz:**
+- Instala todas as dependências (incluindo ferramentas de dev)
+- Configura pre-push hook para verificações de qualidade
+- Formata o código inicial
+- Roda verificações de qualidade
+
+### Ferramentas de Qualidade de Código
+
+#### Formatar Código (Black)
+```bash
+make format
+# OU
+uv run black app/ tests/
+```
+
+#### Verificar Linting (Flake8 + Pylint)
+```bash
+make lint
+# OU
+uv run flake8 app/ tests/
+uv run pylint app/ --recursive=y
+```
+
+#### Verificar Tipos (MyPy)
+```bash
+make typecheck
+# OU
+uv run mypy app/
+```
+
+#### Rodar Tudo de Uma Vez
+```bash
+make quality
+```
+
+### Pre-push Hook
+
+**Importante**: O pre-push hook roda automaticamente antes de cada `git push` e executa:
+1. ✓ Formatação (Black)
+2. ✓ Linting (Flake8 + Pylint)
+3. ✓ Type checking (MyPy)
+4. ✓ Testes (Pytest)
+
+Se qualquer verificação falhar, o push é bloqueado. Isso garante que todo código enviado ao repositório tem qualidade.
+
+---
+
 ## ⚙️ Configuração (Variáveis de Ambiente)
 
 Você pode configurar a aplicação através de variáveis de ambiente com prefixo `MONOPOLY_`:
