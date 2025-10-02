@@ -1,3 +1,5 @@
+from typing import AsyncGenerator
+from contextlib import asynccontextmanager
 import uvicorn
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
@@ -10,6 +12,15 @@ from app.infrastructure.di.container import get_logger
 setup_logging(settings.LOG_LEVEL)
 logger = get_logger("app.main")
 
+
+@asynccontextmanager
+async def lifespan(fastapi_app: FastAPI) -> AsyncGenerator:  # pylint: disable=unused-argument
+    # Startup
+    yield
+    # Shutdown
+    logger.info("Application shutting down")
+
+
 app = FastAPI(
     title=settings.APP_NAME,
     description=(
@@ -19,14 +30,10 @@ app = FastAPI(
     version="1.0.0",
     debug=settings.DEBUG,
     docs_url=settings.DOC_URL,
+    lifespan=lifespan,
 )
 
 app.include_router(router)
-
-
-@app.on_event("shutdown")
-async def shutdown_event() -> None:
-    logger.info("Application shutting down")
 
 
 @app.get("/health", tags=["Health"])

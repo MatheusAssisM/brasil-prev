@@ -2,6 +2,7 @@ from app.domain.models import Player
 from app.domain.engine import GameEngine
 from app.domain.strategies import ImpulsiveStrategy, DemandingStrategy
 from app.infrastructure.generators.random import RandomBoardGenerator, StandardDiceRoller
+from app.infrastructure.di.container import get_logger
 
 
 class TestGameEngine:
@@ -12,7 +13,8 @@ class TestGameEngine:
         players = [Player(f"Player {i}", ImpulsiveStrategy()) for i in range(4)]
         generator = RandomBoardGenerator()
         board = generator.generate(20)
-        engine = GameEngine(players, board)
+        logger = get_logger("test")
+        engine = GameEngine(players, board, logger)
 
         assert len(engine.state.players) == 4
         assert engine.state.board.size() == 20
@@ -22,7 +24,8 @@ class TestGameEngine:
         players = [Player("Test", ImpulsiveStrategy())]
         generator = RandomBoardGenerator()
         board = generator.generate(20)
-        engine = GameEngine(players, board)
+        logger = get_logger("test")
+        engine = GameEngine(players, board, logger)
         dice_roller = StandardDiceRoller()
         engine.set_dice_roller(dice_roller.roll)
 
@@ -36,7 +39,8 @@ class TestGameEngine:
         player = Player("Test", ImpulsiveStrategy(), initial_balance=1000)
         generator = RandomBoardGenerator()
         board = generator.generate(20)
-        engine = GameEngine([player], board)
+        logger = get_logger("test")
+        engine = GameEngine([player], board, logger)
         dice_roller = StandardDiceRoller()
         engine.set_dice_roller(dice_roller.roll)
 
@@ -51,7 +55,8 @@ class TestGameEngine:
         player = Player("Test", ImpulsiveStrategy(), initial_balance=1000)
         generator = RandomBoardGenerator()
         board = generator.generate(num_properties=20)
-        engine = GameEngine([player], board)
+        logger = get_logger("test")
+        engine = GameEngine([player], board, logger)
         dice_roller = StandardDiceRoller()
         engine.set_dice_roller(dice_roller.roll)
 
@@ -69,7 +74,8 @@ class TestGameEngine:
         player2 = Player("Player 2", ImpulsiveStrategy(), initial_balance=1000)
 
         board = generator.generate(num_properties=20)
-        engine = GameEngine([player1, player2], board)
+        logger = get_logger("test")
+        engine = GameEngine([player1, player2], board, logger)
 
         # Have player1 own a property via board repository
         prop = board.get_property(3)
@@ -98,7 +104,8 @@ class TestGameEngine:
         player = Player("Test", ImpulsiveStrategy(), initial_balance=10)
         generator = RandomBoardGenerator()
         board = generator.generate(20)
-        GameEngine([player], board)
+        logger = get_logger("test")
+        GameEngine([player], board, logger)
 
         player.pay_rent(50)  # Force negative balance
 
@@ -110,7 +117,8 @@ class TestGameEngine:
         players = [Player(f"Player {i}", ImpulsiveStrategy()) for i in range(4)]
         generator = RandomBoardGenerator()
         board = generator.generate(20)
-        engine = GameEngine(players, board)
+        logger = get_logger("test")
+        engine = GameEngine(players, board, logger)
         dice_roller = StandardDiceRoller()
         engine.set_dice_roller(dice_roller.roll)
 
@@ -127,7 +135,8 @@ class TestGameEngine:
         ]
         generator = RandomBoardGenerator()
         board = generator.generate(20)
-        engine = GameEngine(players, board)
+        logger = get_logger("test")
+        engine = GameEngine(players, board, logger)
         dice_roller = StandardDiceRoller()
         engine.set_dice_roller(dice_roller.roll)
 
@@ -144,7 +153,8 @@ class TestGameEngine:
         players = [Player(f"Player {i}", ImpulsiveStrategy()) for i in range(2)]
         generator = RandomBoardGenerator()
         board = generator.generate(20)
-        engine = GameEngine(players, board)
+        logger = get_logger("test")
+        engine = GameEngine(players, board, logger)
         dice_roller = StandardDiceRoller()
         engine.set_dice_roller(dice_roller.roll)
 

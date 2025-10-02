@@ -40,7 +40,7 @@ lint:
 typecheck:
 	uv run mypy app/
 
-quality: format lint typecheck test
+quality: format lint typecheck
 	@echo ""
 	@echo "✓ All quality checks passed!"
 

@@ -1,5 +1,5 @@
-from app.game.models import Player, Property
-from app.game.strategies import (
+from app.domain.models import Player, Property
+from app.domain.strategies import (
     ImpulsiveStrategy,
     DemandingStrategy,
     CautiousStrategy,
