@@ -21,7 +21,6 @@ A Python-based simulation of a simplified Monopoly-style board game with clean a
   - Elimination when balance < 0
   - Victory: Last player standing OR highest balance after 1000 rounds
 - **FastAPI REST API**: Run single or batch simulations via HTTP
-- **Comprehensive Tests**: 44+ tests covering all components
 
 ## Project Structure
 
@@ -159,16 +158,6 @@ uv run pytest --cov=brasil_prev --cov-report=html
 uv run pytest tests/test_strategies.py
 ```
 
-### Run Linting
-
-```bash
-# Format code
-uv run ruff format .
-
-# Lint code
-uv run ruff check .
-```
-
 ## Architecture Decisions
 
 ### Strategy Pattern
@@ -196,27 +185,6 @@ cautious = PlayerFactory.create_cautious_player("Bob", balance=500)
 players = PlayerFactory.create_default_players()
 ```
 
-### Repository Pattern
-`InMemoryPropertyRepository` isolates property storage from business logic:
-- Separates data access from domain models
-- Makes it easy to swap storage implementations (e.g., database)
-- Centralizes property ownership management
-- Provides clean interface for property queries
-
-### Immutable Data Structures
-`Property` is implemented as a frozen dataclass:
-- Prevents accidental mutations
-- Makes code more predictable and easier to reason about
-- Ownership changes create new instances rather than mutating existing ones
-- Supports functional programming patterns
-
-### Type Hints
-Comprehensive type annotations throughout:
-- Improved IDE support and autocomplete
-- Better documentation
-- Catch type errors early with mypy
-- Makes code more maintainable
-
 ### Domain-Driven Design
 Clear separation between:
 - **Domain Layer**: Pure business logic and rules
@@ -230,9 +198,3 @@ All game rules are centralized in `GameEngine`:
 - Property purchase logic
 - Rent payment flow
 - Elimination and victory conditions
-
-This ensures consistency and makes the rules easy to verify and modify.
-
-## License
-
-MIT
