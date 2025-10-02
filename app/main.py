@@ -7,7 +7,7 @@ from app.core.config import settings
 from app.infrastructure.logging.logger import setup_logging
 from app.infrastructure.di.container import get_logger
 
-setup_logging(settings.log_level)
+setup_logging(settings.LOG_LEVEL)
 logger = get_logger("app.main")
 
 app = FastAPI(
