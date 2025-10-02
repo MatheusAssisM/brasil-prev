@@ -54,3 +54,4 @@ clean:
 	rm -rf .pytest_cache __pycache__ .ruff_cache .mypy_cache
 	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
 	find . -type f -name "*.pyc" -delete
+	rm -rf htmlcov
