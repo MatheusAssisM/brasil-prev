@@ -8,6 +8,7 @@ from app.game.strategies import (
     RandomStrategy,
 )
 from app.core.config import GameConfig
+from app.core.exceptions import InvalidPlayerError
 
 
 class PlayerFactory:
@@ -28,6 +29,12 @@ class PlayerFactory:
         Returns:
             Player with impulsive strategy
         """
+        if not name or not name.strip():
+            raise InvalidPlayerError("Player name cannot be empty")
+        if balance < 0:
+            raise InvalidPlayerError(
+                f"Balance cannot be negative, got {balance}"
+            )
         return Player(name, ImpulsiveStrategy(), balance)
 
     @staticmethod
@@ -47,6 +54,16 @@ class PlayerFactory:
         Returns:
             Player with demanding strategy
         """
+        if not name or not name.strip():
+            raise InvalidPlayerError("Player name cannot be empty")
+        if balance < 0:
+            raise InvalidPlayerError(
+                f"Balance cannot be negative, got {balance}"
+            )
+        if rent_threshold < 0:
+            raise InvalidPlayerError(
+                f"Rent threshold cannot be negative, got {rent_threshold}"
+            )
         return Player(name, DemandingStrategy(rent_threshold), balance)
 
     @staticmethod
@@ -66,6 +83,16 @@ class PlayerFactory:
         Returns:
             Player with cautious strategy
         """
+        if not name or not name.strip():
+            raise InvalidPlayerError("Player name cannot be empty")
+        if balance < 0:
+            raise InvalidPlayerError(
+                f"Balance cannot be negative, got {balance}"
+            )
+        if reserve_threshold < 0:
+            raise InvalidPlayerError(
+                f"Reserve threshold cannot be negative, got {reserve_threshold}"
+            )
         return Player(name, CautiousStrategy(reserve_threshold), balance)
 
     @staticmethod
@@ -83,6 +110,12 @@ class PlayerFactory:
         Returns:
             Player with random strategy
         """
+        if not name or not name.strip():
+            raise InvalidPlayerError("Player name cannot be empty")
+        if balance < 0:
+            raise InvalidPlayerError(
+                f"Balance cannot be negative, got {balance}"
+            )
         return Player(name, RandomStrategy(), balance)
 
     @staticmethod

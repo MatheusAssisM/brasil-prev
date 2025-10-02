@@ -3,6 +3,7 @@ import uuid
 
 from app.game.models import Player, Board, GameState, Property
 from app.core.config import GameConfig
+from app.core.exceptions import GameConfigurationError, InvalidGameStateError
 from app.utils.logger import get_logger, set_game_context, add_game_context_to_logger
 
 logger = get_logger(__name__)
@@ -22,6 +23,11 @@ class GameEngine:
             players: List of players participating in the game
             board: Board instance with properties
         """
+        if not players:
+            raise GameConfigurationError("Players list cannot be empty")
+        if board is None:
+            raise GameConfigurationError("Board cannot be None")
+
         self.state: GameState = GameState(
             players=players,
             board=board,
@@ -59,6 +65,9 @@ class GameEngine:
         Args:
             player: The player whose turn it is
         """
+        if player is None:
+            raise InvalidGameStateError("Player cannot be None")
+
         if not player.is_active:
             return
 
@@ -102,6 +111,11 @@ class GameEngine:
             player: The player who landed on the property
             property: The property that was landed on
         """
+        if player is None:
+            raise InvalidGameStateError("Player cannot be None")
+        if property is None:
+            raise InvalidGameStateError("Property cannot be None")
+
         if not property.is_owned():
             if player.buy_property(property):
                 self.state.board.set_property_owner(player.position, player)

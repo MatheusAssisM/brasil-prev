@@ -56,14 +56,17 @@ async def simulate_game(
 
     Returns the winner strategy name and list of all player strategies.
     """
-
     try:
         result = simulator.run_single_simulation()
 
         winner_strategy = None
         if result["winner"]:
-            winner_player = next(p for p in result["players"] if p["name"] == result["winner"])
-            winner_strategy = winner_player["strategy"]
+            winner_player = next(
+                (p for p in result["players"] if p["name"] == result["winner"]),
+                None
+            )
+            if winner_player:
+                winner_strategy = winner_player["strategy"]
 
         player_strategies = [p["strategy"] for p in result["players"]]
 
@@ -92,8 +95,6 @@ async def run_batch_simulation(
     over many games and understanding average game characteristics.
 
     """
-  
-
     try:
         result = simulator.run_batch_simulation(request.num_simulations)
 

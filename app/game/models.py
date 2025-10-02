@@ -4,6 +4,13 @@ from dataclasses import dataclass, field
 from typing import List, Optional
 
 from app.core.interfaces import PurchaseStrategy, PropertyRepository
+from app.core.exceptions import (
+    InvalidPropertyError,
+    InvalidPlayerError,
+    InvalidMoveError,
+    InvalidGameStateError,
+    GameConfigurationError
+)
 
 
 @dataclass(frozen=True)
@@ -13,6 +20,16 @@ class Property:
     cost: int
     rent: int
     owner: Optional[Player] = field(default=None, compare=False)
+
+    def __post_init__(self) -> None:
+        if self.cost <= 0:
+            raise InvalidPropertyError(
+                f"Property cost must be positive, got {self.cost}"
+            )
+        if self.rent < 0:
+            raise InvalidPropertyError(
+                f"Property rent cannot be negative, got {self.rent}"
+            )
 
     def is_owned(self) -> bool:
         """Check if property has an owner."""
@@ -36,6 +53,15 @@ class Player:
         strategy: PurchaseStrategy,
         initial_balance: int = 300
     ):
+        if not name or not name.strip():
+            raise InvalidPlayerError("Player name cannot be empty")
+        if initial_balance < 0:
+            raise InvalidPlayerError(
+                f"Initial balance cannot be negative, got {initial_balance}"
+            )
+        if strategy is None:
+            raise InvalidPlayerError("Player strategy cannot be None")
+
         self.name = name
         self.strategy = strategy
         self.balance = initial_balance
@@ -47,10 +73,22 @@ class Player:
         self, steps: int, board_size: int, round_salary: int = 100
     ) -> int:
         """Move player forward by steps, handling board wraparound."""
+        if steps <= 0:
+            raise InvalidMoveError(
+                f"Steps must be positive, got {steps}"
+            )
+        if board_size <= 0:
+            raise InvalidMoveError(
+                f"Board size must be positive, got {board_size}"
+            )
+        if round_salary < 0:
+            raise InvalidMoveError(
+                f"Round salary cannot be negative, got {round_salary}"
+            )
+
         old_position = self.position
         self.position = (self.position + steps) % board_size
 
-        # Check if player completed a full round (passed position 0)
         if (self.position < old_position or
                 (old_position + steps >= board_size)):
             self.balance += round_salary
@@ -59,6 +97,10 @@ class Player:
 
     def can_buy(self, property_cost: int) -> bool:
         """Check if player has enough balance to buy a property."""
+        if property_cost < 0:
+            raise InvalidPropertyError(
+                f"Property cost cannot be negative, got {property_cost}"
+            )
         return self.balance >= property_cost
 
     def buy_property(self, property: Property) -> bool:
@@ -69,6 +111,9 @@ class Player:
         affordable. The actual owner assignment should be handled by
         the caller (GameEngine).
         """
+        if property is None:
+            raise InvalidPropertyError("Property cannot be None")
+
         if not self.can_buy(property.cost):
             return False
 
@@ -81,12 +126,20 @@ class Player:
 
     def pay_rent(self, amount: int) -> None:
         """Pay rent to another player."""
+        if amount < 0:
+            raise InvalidPropertyError(
+                f"Rent amount cannot be negative, got {amount}"
+            )
         self.balance -= amount
         if self.balance < 0:
             self.is_active = False
 
     def receive_rent(self, amount: int) -> None:
         """Receive rent from another player."""
+        if amount < 0:
+            raise InvalidPropertyError(
+                f"Rent amount cannot be negative, got {amount}"
+            )
         self.balance += amount
 
     def eliminate(self) -> List[Property]:
@@ -137,7 +190,18 @@ class Board:
 class GameState:
     """Tracks the current state of the game."""
 
-    def __init__(self, players: List[Player], board: Board, max_rounds: int = 1000):
+    def __init__(
+        self, players: List[Player], board: Board, max_rounds: int = 1000
+    ):
+        if not players:
+            raise GameConfigurationError("Players list cannot be empty")
+        if board is None:
+            raise GameConfigurationError("Board cannot be None")
+        if max_rounds <= 0:
+            raise GameConfigurationError(
+                f"Max rounds must be positive, got {max_rounds}"
+            )
+
         self.players = players
         self.board = board
         self.round_count = 0
@@ -153,21 +217,21 @@ class GameState:
         """Check if game has ended and determine winner."""
         active_players = self.get_active_players()
 
-        # Only one player left
         if len(active_players) == 1:
             self.winner = active_players[0]
             self.game_over = True
             return True
 
-        # All players eliminated
         if len(active_players) == 0:
             self.game_over = True
+            self.winner = None
             return True
 
-        # Max rounds reached
         if self.round_count >= self.max_rounds:
-            # Winner is the player with highest balance
-            self.winner = max(active_players, key=lambda p: p.balance)
+            if active_players:
+                self.winner = max(active_players, key=lambda p: p.balance)
+            else:
+                self.winner = None
             self.game_over = True
             return True
 

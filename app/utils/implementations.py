@@ -2,6 +2,7 @@ import random
 from typing import Optional
 
 from app.core.interfaces import DiceRoller, BoardGenerator
+from app.core.exceptions import GameConfigurationError
 from app.game.models import Board, Property
 from app.game.repositories import InMemoryPropertyRepository
 from app.core.config import GameConfig
@@ -31,6 +32,11 @@ class RandomBoardGenerator(BoardGenerator):
         """
         if num_properties is None:
             num_properties = GameConfig.NUM_PROPERTIES
+
+        if num_properties <= 0:
+            raise GameConfigurationError(
+                f"num_properties must be positive, got {num_properties}"
+            )
 
         properties = []
         for _ in range(num_properties):
