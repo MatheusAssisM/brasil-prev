@@ -85,13 +85,6 @@ async def run_batch_simulation(
     This endpoint is useful for analyzing which strategy performs best
     over many games and understanding average game characteristics.
 
-    Args:
-        request: BatchSimulationRequest with num_simulations parameter
-        simulator: SimulatorService instance (injected)
-
-    Returns:
-        Aggregated statistics including win rates per strategy,
-        average rounds, timeout rates, and most successful strategy.
     """
     try:
         result = simulator.run_batch_simulation(request.num_simulations)
