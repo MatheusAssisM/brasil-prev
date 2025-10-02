@@ -11,12 +11,7 @@ from app.domain.factories import PlayerFactory
 class GameSimulator(SimulatorService):
     """Service that orchestrates game simulations and formats results."""
 
-    def __init__(
-        self,
-        board_generator: BoardGenerator,
-        dice_roller: DiceRoller,
-        logger: Logger
-    ):
+    def __init__(self, board_generator: BoardGenerator, dice_roller: DiceRoller, logger: Logger):
         """
         Initialize simulator with dependencies.
 
@@ -56,14 +51,9 @@ class GameSimulator(SimulatorService):
             Dictionary with aggregated statistics
         """
         if num_simulations <= 0:
-            raise GameConfigurationError(
-                f"num_simulations must be positive, got {num_simulations}"
-            )
+            raise GameConfigurationError(f"num_simulations must be positive, got {num_simulations}")
 
-        self.logger.info(
-            "Starting batch simulation",
-            extra={"num_simulations": num_simulations}
-        )
+        self.logger.info("Starting batch simulation", extra={"num_simulations": num_simulations})
 
         strategy_wins: Dict[str, int] = defaultdict(int)
         strategy_rounds_when_won: Dict[str, List[int]] = defaultdict(list)
@@ -79,14 +69,11 @@ class GameSimulator(SimulatorService):
 
             if result["winner"]:
                 winner_player = next(
-                    (p for p in result["players"] if p["name"] == result["winner"]),
-                    None
+                    (p for p in result["players"] if p["name"] == result["winner"]), None
                 )
                 if winner_player:
                     strategy_wins[winner_player["strategy"]] += 1
-                    strategy_rounds_when_won[winner_player["strategy"]].append(
-                        result["rounds"]
-                    )
+                    strategy_rounds_when_won[winner_player["strategy"]].append(result["rounds"])
 
         strategy_stats = []
         for strategy in ["impulsive", "demanding", "cautious", "random"]:
@@ -122,8 +109,8 @@ class GameSimulator(SimulatorService):
                 "num_simulations": num_simulations,
                 "most_winning_strategy": result["most_winning_strategy"],
                 "avg_rounds": result["avg_rounds"],
-                "timeout_rate": result["timeout_rate"]
-            }
+                "timeout_rate": result["timeout_rate"],
+            },
         )
 
         return result

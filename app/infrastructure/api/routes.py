@@ -12,22 +12,22 @@ logger = get_logger("app.infrastructure.api.routes")
 # Request/Response Models
 class GameResult(BaseModel):
     """Result of a single game simulation."""
+
     winner: Optional[str] = None
     players: List[str]
 
 
 class BatchSimulationRequest(BaseModel):
     """Request to run multiple game simulations."""
+
     num_simulations: int = Field(
-        default=300,
-        ge=1,
-        le=10000,
-        description="Number of games to simulate"
+        default=300, ge=1, le=10000, description="Number of games to simulate"
     )
 
 
 class StrategyStatistics(BaseModel):
     """Statistics for a specific strategy across multiple games."""
+
     strategy: str
     wins: int
     win_rate: float
@@ -37,6 +37,7 @@ class StrategyStatistics(BaseModel):
 
 class BatchSimulationResult(BaseModel):
     """Aggregated results from multiple game simulations."""
+
     total_simulations: int
     timeouts: int
     timeout_rate: float
@@ -47,9 +48,7 @@ class BatchSimulationResult(BaseModel):
 
 # Routes
 @router.post("/game/simulate", response_model=GameResult, tags=["Simulation"])
-async def simulate_game(
-    simulator: SimulatorService = Depends(get_simulator_service)
-):
+async def simulate_game(simulator: SimulatorService = Depends(get_simulator_service)):
     """
     Run a single game simulation with 4 players using different strategies.
 
@@ -61,8 +60,7 @@ async def simulate_game(
         winner_strategy = None
         if result["winner"]:
             winner_player = next(
-                (p for p in result["players"] if p["name"] == result["winner"]),
-                None
+                (p for p in result["players"] if p["name"] == result["winner"]), None
             )
             if winner_player:
                 winner_strategy = winner_player["strategy"]
@@ -74,18 +72,13 @@ async def simulate_game(
             players=player_strategies,
         )
     except Exception as e:
-        logger.error(
-            "Game simulation failed",
-            extra={"error": str(e)},
-            exc_info=True
-        )
+        logger.error("Game simulation failed", extra={"error": str(e)}, exc_info=True)
         raise HTTPException(status_code=500, detail=f"Game simulation failed: {str(e)}")
 
 
 @router.post("/game/stats", response_model=BatchSimulationResult, tags=["Simulation"])
 async def run_batch_simulation(
-    request: BatchSimulationRequest,
-    simulator: SimulatorService = Depends(get_simulator_service)
+    request: BatchSimulationRequest, simulator: SimulatorService = Depends(get_simulator_service)
 ):
     """
     Run multiple game simulations and return aggregated statistics.
@@ -117,12 +110,7 @@ async def run_batch_simulation(
     except Exception as e:
         logger.error(
             "Batch simulation failed",
-            extra={
-                "num_simulations": request.num_simulations,
-                "error": str(e)
-            },
-            exc_info=True
+            extra={"num_simulations": request.num_simulations, "error": str(e)},
+            exc_info=True,
         )
-        raise HTTPException(
-            status_code=500, detail=f"Batch simulation failed: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Batch simulation failed: {str(e)}")

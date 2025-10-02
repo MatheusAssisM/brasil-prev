@@ -1,15 +1,7 @@
 from functools import lru_cache
 
-from app.core.interfaces import (
-    DiceRoller,
-    BoardGenerator,
-    SimulatorService,
-    Logger
-)
-from app.infrastructure.generators.random import (
-    StandardDiceRoller,
-    RandomBoardGenerator
-)
+from app.core.interfaces import DiceRoller, BoardGenerator, SimulatorService, Logger
+from app.infrastructure.generators.random import StandardDiceRoller, RandomBoardGenerator
 from app.infrastructure.logging.logger import StructuredLogger
 from app.application.simulator import GameSimulator
 from fastapi import Depends
@@ -52,7 +44,7 @@ def get_logger(name: str = "app") -> Logger:
 
 def get_simulator_service(
     dice_roller: DiceRoller = Depends(get_dice_roller),
-    board_generator: BoardGenerator = Depends(get_board_generator)
+    board_generator: BoardGenerator = Depends(get_board_generator),
 ) -> SimulatorService:
     """
     Get simulator service instance with dependencies injected.

@@ -16,23 +16,23 @@ class CustomJsonFormatter(JsonFormatter):
         super().add_fields(log_record, record, message_dict)
 
         # Add timestamp
-        log_record['timestamp'] = self.formatTime(record, self.datefmt)
+        log_record["timestamp"] = self.formatTime(record, self.datefmt)
 
         # Add level name
-        log_record['level'] = record.levelname
+        log_record["level"] = record.levelname
 
         # Add logger name
-        log_record['logger'] = record.name
+        log_record["logger"] = record.name
 
         # Add module and function
-        log_record['module'] = record.module
-        log_record['function'] = record.funcName
+        log_record["module"] = record.module
+        log_record["function"] = record.funcName
 
         # Add game context if available
-        if hasattr(record, 'game_id'):
-            log_record['game_id'] = record.game_id
-        if hasattr(record, 'round_number'):
-            log_record['round_number'] = record.round_number
+        if hasattr(record, "game_id"):
+            log_record["game_id"] = record.game_id
+        if hasattr(record, "round_number"):
+            log_record["round_number"] = record.round_number
 
 
 def setup_logging(log_level: str = "INFO") -> None:
@@ -58,7 +58,7 @@ def setup_logging(log_level: str = "INFO") -> None:
 
     # Create JSON formatter
     formatter = CustomJsonFormatter(
-        '%(timestamp)s %(level)s %(logger)s %(module)s %(function)s %(message)s'
+        "%(timestamp)s %(level)s %(logger)s %(module)s %(function)s %(message)s"
     )
     console_handler.setFormatter(formatter)
 
@@ -82,10 +82,6 @@ class StructuredLogger(Logger):
         self._logger.warning(msg, extra=extra or {})
 
     def error(
-        self,
-        msg: str,
-        extra: Optional[Dict[str, Any]] = None,
-        exc_info: bool = False
+        self, msg: str, extra: Optional[Dict[str, Any]] = None, exc_info: bool = False
     ) -> None:
         self._logger.error(msg, extra=extra or {}, exc_info=exc_info)
-

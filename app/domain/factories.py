@@ -16,8 +16,7 @@ class PlayerFactory:
 
     @staticmethod
     def create_impulsive_player(
-        name: str = "Impulsive Player",
-        balance: int = GameConfig.INITIAL_BALANCE
+        name: str = "Impulsive Player", balance: int = GameConfig.INITIAL_BALANCE
     ) -> Player:
         """
         Create a player with impulsive strategy.
@@ -32,16 +31,14 @@ class PlayerFactory:
         if not name or not name.strip():
             raise InvalidPlayerError("Player name cannot be empty")
         if balance < 0:
-            raise InvalidPlayerError(
-                f"Balance cannot be negative, got {balance}"
-            )
+            raise InvalidPlayerError(f"Balance cannot be negative, got {balance}")
         return Player(name, ImpulsiveStrategy(), balance)
 
     @staticmethod
     def create_demanding_player(
         name: str = "Demanding Player",
         balance: int = GameConfig.INITIAL_BALANCE,
-        rent_threshold: int = GameConfig.DEMANDING_RENT_THRESHOLD
+        rent_threshold: int = GameConfig.DEMANDING_RENT_THRESHOLD,
     ) -> Player:
         """
         Create a player with demanding strategy.
@@ -57,20 +54,16 @@ class PlayerFactory:
         if not name or not name.strip():
             raise InvalidPlayerError("Player name cannot be empty")
         if balance < 0:
-            raise InvalidPlayerError(
-                f"Balance cannot be negative, got {balance}"
-            )
+            raise InvalidPlayerError(f"Balance cannot be negative, got {balance}")
         if rent_threshold < 0:
-            raise InvalidPlayerError(
-                f"Rent threshold cannot be negative, got {rent_threshold}"
-            )
+            raise InvalidPlayerError(f"Rent threshold cannot be negative, got {rent_threshold}")
         return Player(name, DemandingStrategy(rent_threshold), balance)
 
     @staticmethod
     def create_cautious_player(
         name: str = "Cautious Player",
         balance: int = GameConfig.INITIAL_BALANCE,
-        reserve_threshold: int = GameConfig.CAUTIOUS_RESERVE_THRESHOLD
+        reserve_threshold: int = GameConfig.CAUTIOUS_RESERVE_THRESHOLD,
     ) -> Player:
         """
         Create a player with cautious strategy.
@@ -86,9 +79,7 @@ class PlayerFactory:
         if not name or not name.strip():
             raise InvalidPlayerError("Player name cannot be empty")
         if balance < 0:
-            raise InvalidPlayerError(
-                f"Balance cannot be negative, got {balance}"
-            )
+            raise InvalidPlayerError(f"Balance cannot be negative, got {balance}")
         if reserve_threshold < 0:
             raise InvalidPlayerError(
                 f"Reserve threshold cannot be negative, got {reserve_threshold}"
@@ -97,8 +88,7 @@ class PlayerFactory:
 
     @staticmethod
     def create_random_player(
-        name: str = "Random Player",
-        balance: int = GameConfig.INITIAL_BALANCE
+        name: str = "Random Player", balance: int = GameConfig.INITIAL_BALANCE
     ) -> Player:
         """
         Create a player with random strategy.
@@ -113,9 +103,7 @@ class PlayerFactory:
         if not name or not name.strip():
             raise InvalidPlayerError("Player name cannot be empty")
         if balance < 0:
-            raise InvalidPlayerError(
-                f"Balance cannot be negative, got {balance}"
-            )
+            raise InvalidPlayerError(f"Balance cannot be negative, got {balance}")
         return Player(name, RandomStrategy(), balance)
 
     @staticmethod

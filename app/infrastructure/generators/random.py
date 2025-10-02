@@ -34,20 +34,12 @@ class RandomBoardGenerator(BoardGenerator):
             num_properties = GameConfig.NUM_PROPERTIES
 
         if num_properties <= 0:
-            raise GameConfigurationError(
-                f"num_properties must be positive, got {num_properties}"
-            )
+            raise GameConfigurationError(f"num_properties must be positive, got {num_properties}")
 
         properties = []
         for _ in range(num_properties):
-            cost = random.randint(
-                GameConfig.MIN_PROPERTY_COST,
-                GameConfig.MAX_PROPERTY_COST
-            )
-            rent = random.randint(
-                GameConfig.MIN_PROPERTY_RENT,
-                GameConfig.MAX_PROPERTY_RENT
-            )
+            cost = random.randint(GameConfig.MIN_PROPERTY_COST, GameConfig.MAX_PROPERTY_COST)
+            rent = random.randint(GameConfig.MIN_PROPERTY_RENT, GameConfig.MAX_PROPERTY_RENT)
             properties.append(Property(cost=cost, rent=rent))
 
         repository = InMemoryPropertyRepository(properties)

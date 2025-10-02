@@ -17,9 +17,7 @@ class InMemoryPropertyRepository(PropertyRepository):
             properties: List of Property instances (should be immutable)
         """
         self._properties: List[Property] = properties
-        self._owners: Dict[int, Optional[Player]] = {
-            i: None for i in range(len(properties))
-        }
+        self._owners: Dict[int, Optional[Player]] = {i: None for i in range(len(properties))}
 
     def get_property(self, position: int) -> Property:
         """Get property at a specific position."""

@@ -12,12 +12,7 @@ class GameEngine:
     Main game engine that orchestrates the game flow and enforces rules.
     """
 
-    def __init__(
-        self,
-        players: List[Player],
-        board: Board,
-        logger: Logger
-    ) -> None:
+    def __init__(self, players: List[Player], board: Board, logger: Logger) -> None:
         """
         Initialize the game engine.
 
@@ -32,9 +27,7 @@ class GameEngine:
             raise GameConfigurationError("Board cannot be None")
 
         self.state: GameState = GameState(
-            players=players,
-            board=board,
-            max_rounds=GameConfig.MAX_ROUNDS
+            players=players, board=board, max_rounds=GameConfig.MAX_ROUNDS
         )
         self.dice_roller: Optional[Callable[[], int]] = None
         self.game_id = str(uuid.uuid4())
@@ -46,8 +39,8 @@ class GameEngine:
                 "game_id": self.game_id,
                 "num_players": len(players),
                 "player_strategies": [p.strategy.get_name() for p in players],
-                "board_size": board.size()
-            }
+                "board_size": board.size(),
+            },
         )
 
     def set_dice_roller(self, dice_roller: Callable[[], int]) -> None:
@@ -60,6 +53,7 @@ class GameEngine:
             return self.dice_roller()
         # Fallback to default
         import random
+
         return random.randint(1, 6)
 
     def play_turn(self, player: Player) -> None:
@@ -76,11 +70,7 @@ class GameEngine:
             return
 
         steps = self.roll_dice()
-        player.move(
-            steps,
-            self.state.board.size(),
-            GameConfig.ROUND_SALARY
-        )
+        player.move(steps, self.state.board.size(), GameConfig.ROUND_SALARY)
 
         property = self.state.board.get_property(player.position)
         self._handle_property_landing(player, property)
@@ -93,8 +83,8 @@ class GameEngine:
                     "player": player.name,
                     "strategy": player.strategy.get_name(),
                     "final_balance": player.balance,
-                    "properties_owned": len(player.properties)
-                }
+                    "properties_owned": len(player.properties),
+                },
             )
             released_properties = player.eliminate()
             # Release all properties owned by eliminated player
@@ -102,8 +92,7 @@ class GameEngine:
                 # Find position of this property and reset owner
                 for pos in range(self.state.board.size()):
                     board_prop = self.state.board.get_property(pos)
-                    if (board_prop.cost == prop.cost and
-                            board_prop.rent == prop.rent):
+                    if board_prop.cost == prop.cost and board_prop.rent == prop.rent:
                         self.state.board.set_property_owner(pos, None)
                         break
 
@@ -155,8 +144,8 @@ class GameEngine:
                 "winner": self.state.winner.name if self.state.winner else None,
                 "total_rounds": self.state.round_count,
                 "timeout": self.state.round_count >= self.state.max_rounds,
-                "active_players": len(self.state.get_active_players())
-            }
+                "active_players": len(self.state.get_active_players()),
+            },
         )
 
         return self.state

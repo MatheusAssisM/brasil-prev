@@ -139,10 +139,7 @@ class Logger(ABC):
 
     @abstractmethod
     def error(
-        self,
-        msg: str,
-        extra: Optional[Dict[str, Any]] = None,
-        exc_info: bool = False
+        self, msg: str, extra: Optional[Dict[str, Any]] = None, exc_info: bool = False
     ) -> None:
         """Log error message."""
         pass

@@ -8,7 +8,7 @@ from app.core.exceptions import (
     InvalidPropertyError,
     InvalidPlayerError,
     InvalidMoveError,
-    GameConfigurationError
+    GameConfigurationError,
 )
 
 
@@ -22,13 +22,9 @@ class Property:
 
     def __post_init__(self) -> None:
         if self.cost <= 0:
-            raise InvalidPropertyError(
-                f"Property cost must be positive, got {self.cost}"
-            )
+            raise InvalidPropertyError(f"Property cost must be positive, got {self.cost}")
         if self.rent < 0:
-            raise InvalidPropertyError(
-                f"Property rent cannot be negative, got {self.rent}"
-            )
+            raise InvalidPropertyError(f"Property rent cannot be negative, got {self.rent}")
 
     def is_owned(self) -> bool:
         """Check if property has an owner."""
@@ -46,18 +42,11 @@ class Property:
 class Player:
     """Represents a player in the game."""
 
-    def __init__(
-        self,
-        name: str,
-        strategy: PurchaseStrategy,
-        initial_balance: int = 300
-    ):
+    def __init__(self, name: str, strategy: PurchaseStrategy, initial_balance: int = 300):
         if not name or not name.strip():
             raise InvalidPlayerError("Player name cannot be empty")
         if initial_balance < 0:
-            raise InvalidPlayerError(
-                f"Initial balance cannot be negative, got {initial_balance}"
-            )
+            raise InvalidPlayerError(f"Initial balance cannot be negative, got {initial_balance}")
         if strategy is None:
             raise InvalidPlayerError("Player strategy cannot be None")
 
@@ -68,28 +57,19 @@ class Player:
         self.properties: List[Property] = []
         self.is_active = True
 
-    def move(
-        self, steps: int, board_size: int, round_salary: int = 100
-    ) -> int:
+    def move(self, steps: int, board_size: int, round_salary: int = 100) -> int:
         """Move player forward by steps, handling board wraparound."""
         if steps <= 0:
-            raise InvalidMoveError(
-                f"Steps must be positive, got {steps}"
-            )
+            raise InvalidMoveError(f"Steps must be positive, got {steps}")
         if board_size <= 0:
-            raise InvalidMoveError(
-                f"Board size must be positive, got {board_size}"
-            )
+            raise InvalidMoveError(f"Board size must be positive, got {board_size}")
         if round_salary < 0:
-            raise InvalidMoveError(
-                f"Round salary cannot be negative, got {round_salary}"
-            )
+            raise InvalidMoveError(f"Round salary cannot be negative, got {round_salary}")
 
         old_position = self.position
         self.position = (self.position + steps) % board_size
 
-        if (self.position < old_position or
-                (old_position + steps >= board_size)):
+        if self.position < old_position or (old_position + steps >= board_size):
             self.balance += round_salary
 
         return self.position
@@ -97,9 +77,7 @@ class Player:
     def can_buy(self, property_cost: int) -> bool:
         """Check if player has enough balance to buy a property."""
         if property_cost < 0:
-            raise InvalidPropertyError(
-                f"Property cost cannot be negative, got {property_cost}"
-            )
+            raise InvalidPropertyError(f"Property cost cannot be negative, got {property_cost}")
         return self.balance >= property_cost
 
     def buy_property(self, property: Property) -> bool:
@@ -126,9 +104,7 @@ class Player:
     def pay_rent(self, amount: int) -> None:
         """Pay rent to another player."""
         if amount < 0:
-            raise InvalidPropertyError(
-                f"Rent amount cannot be negative, got {amount}"
-            )
+            raise InvalidPropertyError(f"Rent amount cannot be negative, got {amount}")
         self.balance -= amount
         if self.balance < 0:
             self.is_active = False
@@ -136,9 +112,7 @@ class Player:
     def receive_rent(self, amount: int) -> None:
         """Receive rent from another player."""
         if amount < 0:
-            raise InvalidPropertyError(
-                f"Rent amount cannot be negative, got {amount}"
-            )
+            raise InvalidPropertyError(f"Rent amount cannot be negative, got {amount}")
         self.balance += amount
 
     def eliminate(self) -> List[Property]:
@@ -170,9 +144,7 @@ class Board:
         """Get property at a specific position."""
         return self._repository.get_property(position)
 
-    def set_property_owner(
-        self, position: int, player: Optional[Player]
-    ) -> None:
+    def set_property_owner(self, position: int, player: Optional[Player]) -> None:
         """Set the owner of a property at a specific position."""
         self._repository.set_owner(position, player)
 
@@ -189,17 +161,13 @@ class Board:
 class GameState:
     """Tracks the current state of the game."""
 
-    def __init__(
-        self, players: List[Player], board: Board, max_rounds: int = 1000
-    ):
+    def __init__(self, players: List[Player], board: Board, max_rounds: int = 1000):
         if not players:
             raise GameConfigurationError("Players list cannot be empty")
         if board is None:
             raise GameConfigurationError("Board cannot be None")
         if max_rounds <= 0:
-            raise GameConfigurationError(
-                f"Max rounds must be positive, got {max_rounds}"
-            )
+            raise GameConfigurationError(f"Max rounds must be positive, got {max_rounds}")
 
         self.players = players
         self.board = board

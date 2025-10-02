@@ -18,7 +18,7 @@ app = FastAPI(
     ),
     version="1.0.0",
     debug=settings.DEBUG,
-    docs_url=settings.DOC_URL
+    docs_url=settings.DOC_URL,
 )
 
 app.include_router(router)
