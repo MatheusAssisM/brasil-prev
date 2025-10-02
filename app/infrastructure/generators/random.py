@@ -3,8 +3,8 @@ from typing import Optional
 
 from app.core.interfaces import DiceRoller, BoardGenerator
 from app.core.exceptions import GameConfigurationError
-from app.game.models import Board, Property
-from app.game.repositories import InMemoryPropertyRepository
+from app.domain.models import Board, Property
+from app.infrastructure.persistence.repositories import InMemoryPropertyRepository
 from app.core.config import GameConfig
 
 

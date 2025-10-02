@@ -3,16 +3,16 @@ from collections import defaultdict
 
 from app.core.interfaces import SimulatorService, DiceRoller, BoardGenerator
 from app.core.exceptions import GameConfigurationError
-from app.game.models import Player
-from app.game.engine import GameEngine
-from app.game.strategies import (
+from app.domain.models import Player
+from app.domain.engine import GameEngine
+from app.domain.strategies import (
     ImpulsiveStrategy,
     DemandingStrategy,
     CautiousStrategy,
     RandomStrategy,
 )
 from app.core.config import GameConfig
-from app.utils.logger import get_logger, clear_game_context
+from app.infrastructure.logging.logger import get_logger, clear_game_context
 
 logger = get_logger(__name__)
 

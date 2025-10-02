@@ -1,10 +1,14 @@
 from typing import Callable, Dict, Any, List, Optional
 import uuid
 
-from app.game.models import Player, Board, GameState, Property
+from app.domain.models import Player, Board, GameState, Property
 from app.core.config import GameConfig
 from app.core.exceptions import GameConfigurationError, InvalidGameStateError
-from app.utils.logger import get_logger, set_game_context, add_game_context_to_logger
+from app.infrastructure.logging.logger import (
+    get_logger,
+    set_game_context,
+    add_game_context_to_logger
+)
 
 logger = get_logger(__name__)
 add_game_context_to_logger(logger)

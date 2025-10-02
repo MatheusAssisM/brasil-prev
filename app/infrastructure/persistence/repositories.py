@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Dict, List, Optional
 
 from app.core.interfaces import PropertyRepository
-from app.game.models import Property, Player
+from app.domain.models import Property, Player
 
 
 class InMemoryPropertyRepository(PropertyRepository):

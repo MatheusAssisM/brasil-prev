@@ -2,10 +2,13 @@ from functools import lru_cache
 from typing import List
 
 from app.core.interfaces import DiceRoller, BoardGenerator, SimulatorService
-from app.utils.implementations import StandardDiceRoller, RandomBoardGenerator
-from app.services.simulator import GameSimulator
-from app.game.models import Player
-from app.game.factories import PlayerFactory
+from app.infrastructure.generators.random import (
+    StandardDiceRoller,
+    RandomBoardGenerator
+)
+from app.application.simulator import GameSimulator
+from app.domain.models import Player
+from app.domain.factories import PlayerFactory
 from fastapi import Depends
 
 

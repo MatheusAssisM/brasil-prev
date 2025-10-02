@@ -1,7 +1,7 @@
 from typing import List
 
-from app.game.models import Player
-from app.game.strategies import (
+from app.domain.models import Player
+from app.domain.strategies import (
     ImpulsiveStrategy,
     DemandingStrategy,
     CautiousStrategy,

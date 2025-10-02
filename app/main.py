@@ -4,9 +4,9 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 
-from app.api.routes import router
+from app.infrastructure.api.routes import router
 from app.core.config import settings
-from app.utils.logger import setup_logging, get_logger
+from app.infrastructure.logging.logger import setup_logging, get_logger
 
 # Initialize logging
 setup_logging(settings.log_level)

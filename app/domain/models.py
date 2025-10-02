@@ -8,7 +8,6 @@ from app.core.exceptions import (
     InvalidPropertyError,
     InvalidPlayerError,
     InvalidMoveError,
-    InvalidGameStateError,
     GameConfigurationError
 )
 

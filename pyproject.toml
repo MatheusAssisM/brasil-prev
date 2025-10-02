@@ -12,7 +12,7 @@ dependencies = [
 ]
 
 [project.scripts]
-start = "app.main:start"
+start = "app.main:start --reload"
 
 [dependency-groups]
 dev = [

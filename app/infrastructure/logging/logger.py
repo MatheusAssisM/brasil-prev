@@ -7,23 +7,6 @@ from typing import Optional
 from pythonjsonlogger.json import JsonFormatter
 
 
-class GameContextFilter(logging.Filter):
-    """Add game context to log records."""
-
-    def __init__(self):
-        super().__init__()
-        self.game_id: Optional[str] = None
-        self.round_number: Optional[int] = None
-
-    def filter(self, record: logging.LogRecord) -> bool:
-        """Add game context fields to the record."""
-        if self.game_id:
-            record.game_id = self.game_id
-        if self.round_number is not None:
-            record.round_number = self.round_number
-        return True
-
-
 class CustomJsonFormatter(JsonFormatter):
     """Custom JSON formatter with additional fields."""
 
@@ -81,47 +64,3 @@ def setup_logging(log_level: str = "INFO") -> None:
     # Add handler to root logger
     root_logger.addHandler(console_handler)
 
-
-def get_logger(name: str) -> logging.Logger:
-    """
-    Get a logger instance with the given name.
-
-    Args:
-        name: Logger name (typically __name__)
-
-    Returns:
-        Logger instance
-    """
-    return logging.getLogger(name)
-
-
-# Global context filter for game tracing
-_game_context_filter = GameContextFilter()
-
-
-def set_game_context(game_id: Optional[str] = None, round_number: Optional[int] = None) -> None:
-    """
-    Set game context for logging.
-
-    Args:
-        game_id: Unique identifier for the game
-        round_number: Current round number
-    """
-    _game_context_filter.game_id = game_id
-    _game_context_filter.round_number = round_number
-
-
-def clear_game_context() -> None:
-    """Clear game context."""
-    _game_context_filter.game_id = None
-    _game_context_filter.round_number = None
-
-
-def add_game_context_to_logger(logger: logging.Logger) -> None:
-    """
-    Add game context filter to a logger.
-
-    Args:
-        logger: Logger instance
-    """
-    logger.addFilter(_game_context_filter)
