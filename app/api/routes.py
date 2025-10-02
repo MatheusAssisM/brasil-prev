@@ -4,8 +4,10 @@ from pydantic import BaseModel, Field
 
 from app.core.interfaces import SimulatorService
 from app.core.dependencies import get_simulator_service
+from app.utils.logger import get_logger
 
 router = APIRouter()
+logger = get_logger(__name__)
 
 
 # Request/Response Models
@@ -54,6 +56,8 @@ async def simulate_game(
 
     Returns the winner strategy name and list of all player strategies.
     """
+    logger.info("Received request for single game simulation")
+
     try:
         result = simulator.run_single_simulation()
 
@@ -66,11 +70,26 @@ async def simulate_game(
         # Extract player strategies in order (lowercase)
         player_strategies = [p["strategy"] for p in result["players"]]
 
-        return GameResult(
+        response = GameResult(
             winner=winner_strategy,
             players=player_strategies,
         )
+
+        logger.info(
+            "Single game simulation request completed",
+            extra={
+                "winner": winner_strategy,
+                "rounds": result["rounds"]
+            }
+        )
+
+        return response
     except Exception as e:
+        logger.error(
+            "Game simulation failed",
+            extra={"error": str(e)},
+            exc_info=True
+        )
         raise HTTPException(status_code=500, detail=f"Game simulation failed: {str(e)}")
 
 
@@ -86,10 +105,15 @@ async def run_batch_simulation(
     over many games and understanding average game characteristics.
 
     """
+    logger.info(
+        "Received request for batch simulation",
+        extra={"num_simulations": request.num_simulations}
+    )
+
     try:
         result = simulator.run_batch_simulation(request.num_simulations)
 
-        return BatchSimulationResult(
+        response = BatchSimulationResult(
             total_simulations=result["total_simulations"],
             timeouts=result["timeouts"],
             timeout_rate=result["timeout_rate"],
@@ -106,7 +130,25 @@ async def run_batch_simulation(
             ],
             most_winning_strategy=result["most_winning_strategy"],
         )
+
+        logger.info(
+            "Batch simulation request completed",
+            extra={
+                "num_simulations": request.num_simulations,
+                "most_winning_strategy": result["most_winning_strategy"]
+            }
+        )
+
+        return response
     except Exception as e:
+        logger.error(
+            "Batch simulation failed",
+            extra={
+                "num_simulations": request.num_simulations,
+                "error": str(e)
+            },
+            exc_info=True
+        )
         raise HTTPException(
             status_code=500, detail=f"Batch simulation failed: {str(e)}"
         )
