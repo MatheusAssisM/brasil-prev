@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Union
 
 
 class PurchaseStrategy(ABC):
@@ -116,4 +116,33 @@ class PropertyRepository(ABC):
     @abstractmethod
     def size(self) -> int:
         """Get the total number of properties."""
+        pass
+
+
+class Logger(ABC):
+    """Abstract interface for logging."""
+
+    @abstractmethod
+    def debug(self, msg: str, extra: Optional[Dict[str, Any]] = None) -> None:
+        """Log debug message."""
+        pass
+
+    @abstractmethod
+    def info(self, msg: str, extra: Optional[Dict[str, Any]] = None) -> None:
+        """Log info message."""
+        pass
+
+    @abstractmethod
+    def warning(self, msg: str, extra: Optional[Dict[str, Any]] = None) -> None:
+        """Log warning message."""
+        pass
+
+    @abstractmethod
+    def error(
+        self,
+        msg: str,
+        extra: Optional[Dict[str, Any]] = None,
+        exc_info: bool = False
+    ) -> None:
+        """Log error message."""
         pass

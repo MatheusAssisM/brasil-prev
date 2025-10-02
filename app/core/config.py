@@ -38,7 +38,7 @@ class Settings(BaseSettings):
 
     doc_url: str = "/"
 
-    log_level: str = "WARNING"
+    log_level: str = "INFO"
 
 
 settings = Settings()

@@ -1,20 +1,11 @@
 from typing import Dict, Any, List
 from collections import defaultdict
 
-from app.core.interfaces import SimulatorService, DiceRoller, BoardGenerator
+from app.core.interfaces import SimulatorService, DiceRoller, BoardGenerator, Logger
 from app.core.exceptions import GameConfigurationError
 from app.domain.models import Player
 from app.domain.engine import GameEngine
-from app.domain.strategies import (
-    ImpulsiveStrategy,
-    DemandingStrategy,
-    CautiousStrategy,
-    RandomStrategy,
-)
-from app.core.config import GameConfig
-from app.infrastructure.logging.logger import get_logger, clear_game_context
-
-logger = get_logger(__name__)
+from app.domain.factories import PlayerFactory
 
 
 class GameSimulator(SimulatorService):
@@ -22,21 +13,21 @@ class GameSimulator(SimulatorService):
 
     def __init__(
         self,
-        players: List[Player],
         board_generator: BoardGenerator,
-        dice_roller: DiceRoller
+        dice_roller: DiceRoller,
+        logger: Logger
     ):
         """
         Initialize simulator with dependencies.
 
         Args:
-            players: List of players for the game
             board_generator: Board generator instance
             dice_roller: Dice roller instance
+            logger: Logger instance for logging simulation events
         """
-        self.players = players
         self.board_generator = board_generator
         self.dice_roller = dice_roller
+        self.logger = logger
 
     def run_single_simulation(self) -> Dict[str, Any]:
         """
@@ -45,21 +36,12 @@ class GameSimulator(SimulatorService):
         Returns:
             Dictionary with complete game statistics
         """
-
         board = self.board_generator.generate(20)
-
-        players = [
-            Player("Impulsive Player", ImpulsiveStrategy(), GameConfig.INITIAL_BALANCE),
-            Player("Demanding Player", DemandingStrategy(GameConfig.DEMANDING_RENT_THRESHOLD), GameConfig.INITIAL_BALANCE),
-            Player("Cautious Player", CautiousStrategy(GameConfig.CAUTIOUS_RESERVE_THRESHOLD), GameConfig.INITIAL_BALANCE),
-            Player("Random Player", RandomStrategy(), GameConfig.INITIAL_BALANCE),
-        ]
-
-        engine = GameEngine(players, board)
+        players = PlayerFactory.create_default_players()
+        engine = GameEngine(players, board, self.logger)
         engine.set_dice_roller(self.dice_roller.roll)
         engine.play_game()
         result = engine.get_game_result()
-        clear_game_context()
 
         return result
 
@@ -78,7 +60,7 @@ class GameSimulator(SimulatorService):
                 f"num_simulations must be positive, got {num_simulations}"
             )
 
-        logger.info(
+        self.logger.info(
             "Starting batch simulation",
             extra={"num_simulations": num_simulations}
         )
@@ -134,7 +116,7 @@ class GameSimulator(SimulatorService):
             "most_winning_strategy": most_winning["strategy"] if most_winning["wins"] > 0 else None,
         }
 
-        logger.info(
+        self.logger.info(
             "Batch simulation completed",
             extra={
                 "num_simulations": num_simulations,

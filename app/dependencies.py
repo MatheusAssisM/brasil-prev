@@ -1,14 +1,17 @@
 from functools import lru_cache
-from typing import List
 
-from app.core.interfaces import DiceRoller, BoardGenerator, SimulatorService
+from app.core.interfaces import (
+    DiceRoller,
+    BoardGenerator,
+    SimulatorService,
+    Logger
+)
 from app.infrastructure.generators.random import (
     StandardDiceRoller,
     RandomBoardGenerator
 )
+from app.infrastructure.logging.logger import StructuredLogger
 from app.application.simulator import GameSimulator
-from app.domain.models import Player
-from app.domain.factories import PlayerFactory
 from fastapi import Depends
 
 
@@ -34,14 +37,17 @@ def get_board_generator() -> BoardGenerator:
     return RandomBoardGenerator()
 
 
-def get_default_players() -> List[Player]:
+def get_logger(name: str = "app") -> Logger:
     """
-    Get list of default players for a game.
+    Get logger instance.
+
+    Args:
+        name: Logger name
 
     Returns:
-        List of Player instances with different strategies
+        Logger implementation
     """
-    return PlayerFactory.create_default_players()
+    return StructuredLogger(name)
 
 
 def get_simulator_service(
@@ -58,5 +64,5 @@ def get_simulator_service(
     Returns:
         SimulatorService implementation
     """
-    players = get_default_players()
-    return GameSimulator(players, board_generator, dice_roller)
+    logger = get_logger("app.application.simulator")
+    return GameSimulator(board_generator, dice_roller, logger)

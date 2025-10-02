@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import logging
 import sys
-from typing import Optional
+from typing import Optional, Dict, Any
 
 from pythonjsonlogger.json import JsonFormatter
+from app.core.interfaces import Logger
 
 
 class CustomJsonFormatter(JsonFormatter):
@@ -63,4 +64,28 @@ def setup_logging(log_level: str = "INFO") -> None:
 
     # Add handler to root logger
     root_logger.addHandler(console_handler)
+
+
+class StructuredLogger(Logger):
+    """Structured logger implementation using Python's logging module."""
+
+    def __init__(self, name: str):
+        self._logger = logging.getLogger(name)
+
+    def debug(self, msg: str, extra: Optional[Dict[str, Any]] = None) -> None:
+        self._logger.debug(msg, extra=extra or {})
+
+    def info(self, msg: str, extra: Optional[Dict[str, Any]] = None) -> None:
+        self._logger.info(msg, extra=extra or {})
+
+    def warning(self, msg: str, extra: Optional[Dict[str, Any]] = None) -> None:
+        self._logger.warning(msg, extra=extra or {})
+
+    def error(
+        self,
+        msg: str,
+        extra: Optional[Dict[str, Any]] = None,
+        exc_info: bool = False
+    ) -> None:
+        self._logger.error(msg, extra=extra or {}, exc_info=exc_info)
 

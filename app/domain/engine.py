@@ -3,15 +3,8 @@ import uuid
 
 from app.domain.models import Player, Board, GameState, Property
 from app.core.config import GameConfig
+from app.core.interfaces import Logger
 from app.core.exceptions import GameConfigurationError, InvalidGameStateError
-from app.infrastructure.logging.logger import (
-    get_logger,
-    set_game_context,
-    add_game_context_to_logger
-)
-
-logger = get_logger(__name__)
-add_game_context_to_logger(logger)
 
 
 class GameEngine:
@@ -19,13 +12,19 @@ class GameEngine:
     Main game engine that orchestrates the game flow and enforces rules.
     """
 
-    def __init__(self, players: List[Player], board: Board) -> None:
+    def __init__(
+        self,
+        players: List[Player],
+        board: Board,
+        logger: Logger
+    ) -> None:
         """
         Initialize the game engine.
 
         Args:
             players: List of players participating in the game
             board: Board instance with properties
+            logger: Logger instance for logging game events
         """
         if not players:
             raise GameConfigurationError("Players list cannot be empty")
@@ -39,8 +38,9 @@ class GameEngine:
         )
         self.dice_roller: Optional[Callable[[], int]] = None
         self.game_id = str(uuid.uuid4())
+        self.logger = logger
 
-        logger.info(
+        self.logger.info(
             "Game initialized",
             extra={
                 "game_id": self.game_id,
@@ -87,7 +87,7 @@ class GameEngine:
 
         # Check if player is eliminated
         if player.balance < 0:
-            logger.info(
+            self.logger.info(
                 "Player eliminated",
                 extra={
                     "player": player.name,
@@ -130,8 +130,6 @@ class GameEngine:
                 owner.receive_rent(property.rent)
 
     def play_round(self) -> None:
-        """Play a complete round where each active player takes a turn."""
-        set_game_context(game_id=self.game_id, round_number=self.state.round_count + 1)
         active_players = self.state.get_active_players()
         for player in active_players:
             self.play_turn(player)
@@ -144,13 +142,13 @@ class GameEngine:
         Returns:
             The final game state
         """
-        logger.info("Game started", extra={"game_id": self.game_id})
+        self.logger.info("Game started", extra={"game_id": self.game_id})
 
         while not self.state.game_over:
             self.play_round()
             self.state.check_victory_condition()
 
-        logger.info(
+        self.logger.info(
             "Game finished",
             extra={
                 "game_id": self.game_id,
