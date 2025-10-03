@@ -36,7 +36,7 @@ class StrategyStatistics(BaseModel):
 
 
 class BatchSimulationResult(BaseModel):
-    """Aggregated results from multiple game simulations."""
+    """Aggregated results from multiple game simulations with performance metrics."""
 
     total_simulations: int
     timeouts: int
@@ -44,6 +44,10 @@ class BatchSimulationResult(BaseModel):
     avg_rounds: float
     strategy_statistics: List[StrategyStatistics]
     most_winning_strategy: Optional[str] = None
+    execution_time_seconds: float = Field(description="Total execution time in seconds")
+    simulations_per_second: float = Field(description="Throughput (simulations/second)")
+    parallelization_enabled: bool = Field(description="Always True - parallel execution is always used")
+    num_workers: int = Field(description="Number of worker processes used for parallel execution")
 
 
 # Routes
@@ -78,17 +82,16 @@ async def simulate_game(
         raise HTTPException(status_code=500, detail=f"Game simulation failed: {str(e)}") from e
 
 
-@router.post("/game/stats", response_model=BatchSimulationResult, tags=["Simulation"])
-async def run_batch_simulation(
+@router.post("/simulations/benchmark", response_model=BatchSimulationResult, tags=["Simulation"])
+async def run_benchmark_simulation(
     request: BatchSimulationRequest,
     simulator: SimulatorService = Depends(get_simulator_service),
 ) -> BatchSimulationResult:
     """
-    Run multiple game simulations and return aggregated statistics.
+    Run multiple game simulations with parallel execution and performance benchmarking.
 
-    This endpoint is useful for analyzing which strategy performs best
-    over many games and understanding average game characteristics.
-
+    This endpoint runs batch simulations using parallel processing across multiple CPU cores
+    and provides detailed performance metrics including execution time and throughput.
     """
     try:
         result = simulator.run_batch_simulation(request.num_simulations)
@@ -109,6 +112,10 @@ async def run_batch_simulation(
                 for s in result["strategy_statistics"]
             ],
             most_winning_strategy=result["most_winning_strategy"],
+            execution_time_seconds=result["execution_time_seconds"],
+            simulations_per_second=result["simulations_per_second"],
+            parallelization_enabled=result["parallelization_enabled"],
+            num_workers=result["num_workers"],
         )
     except Exception as e:
         logger.error(
