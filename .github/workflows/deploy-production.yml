@@ -1,0 +1,52 @@
+name: deploy-production
+
+on:
+  workflow_run:
+    workflows: ["Code Quality & Tests"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+
+jobs:
+  deploy:
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
+    environment: production
+    runs-on: ubuntu-latest
+    steps:
+    - name: Get environment variables from Bitwarden Secrets Manager
+      uses: bitwarden/sm-action@v2
+      with:
+        access_token: ${{ secrets.BW_SM_ACCESS_TOKEN }}
+        secrets: |
+          ${{ secrets.BE_PROD_BRASIL_PREV }} > ENV_FILE
+          ${{ secrets.INF_PROD_SSH_HOST }} > SSH_HOST
+          ${{ secrets.INF_PROD_SSH_USER }} > SSH_USERNAME
+          ${{ secrets.INF_PROD_SSH_PRIVATE_KEY }} > SSH_KEY
+
+    - name: Deploy
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USERNAME }}
+        key: ${{ secrets.SSH_KEY }}
+        envs: ENV_FILE
+        script: |
+          set -e
+          if [ ! -d "/home/ubuntu/brasil-prev" ]; then
+            cd /home/ubuntu
+            git clone -b main git@github.com:MatheusAssisM/brasil-prev.git
+          fi
+
+          cd /home/ubuntu/brasil-prev
+          git checkout main
+          git pull origin main
+
+          # Apply any changes to running services
+          echo "$ENV_FILE" > .env
+          docker compose -f docker-compose.prod.yml up -d --remove-orphans --build
+
+          # Clean up unused resources
+          docker system prune -f
