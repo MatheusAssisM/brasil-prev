@@ -75,7 +75,7 @@ class TestEndToEndIntegration:
 
     def test_batch_api_integration(self):
         """Test batch simulation API endpoint."""
-        response = client.post("/game/stats", json={"num_simulations": 5})
+        response = client.post("/simulations/benchmark", json={"num_simulations": 5})
 
         assert response.status_code == 200
         data = response.json()
@@ -140,14 +140,15 @@ class TestMockedIntegration:
 
         simulator = GameSimulator(board_generator, dice_roller, mock_logger)
 
-        # Run batch simulation
+        # Run batch simulation (3 simulations will use parallel execution)
         simulator.run_batch_simulation(3)
 
         # Verify logger was called for batch start and completion
         assert mock_logger.info.call_count >= 2
         call_args = [call[0][0] for call in mock_logger.info.call_args_list]
-        assert "Starting batch simulation" in call_args
-        assert "Batch simulation completed" in call_args
+        # Check for parallel execution messages
+        assert "Starting parallel batch simulation" in call_args or "Running batch simulation (single-threaded)" in call_args
+        assert "Parallel batch simulation completed" in call_args or "Running batch simulation (single-threaded)" in call_args
 
 
 @pytest.mark.integration

@@ -50,7 +50,7 @@ class TestSimulationEndpoints:
 
     def test_batch_simulation_default(self):
         """Test batch simulation with default parameters."""
-        response = client.post("/game/stats", json={"num_simulations": 10})
+        response = client.post("/simulations/benchmark", json={"num_simulations": 10})
         assert response.status_code == 200
 
         data = response.json()
@@ -63,8 +63,19 @@ class TestSimulationEndpoints:
         assert "strategy_statistics" in data
         assert "most_winning_strategy" in data
 
+        # Check new performance metrics
+        assert "execution_time_seconds" in data
+        assert "simulations_per_second" in data
+        assert "parallelization_enabled" in data
+        assert "num_workers" in data
+
         # Verify simulations ran
         assert data["total_simulations"] == 10
+
+        # Verify performance metrics
+        assert data["execution_time_seconds"] > 0
+        assert data["simulations_per_second"] > 0
+        assert isinstance(data["parallelization_enabled"], bool)
 
         # Check strategy statistics
         assert len(data["strategy_statistics"]) == 4
@@ -78,7 +89,7 @@ class TestSimulationEndpoints:
 
     def test_batch_simulation_custom_count(self):
         """Test batch simulation with custom simulation count."""
-        response = client.post("/game/stats", json={"num_simulations": 50})
+        response = client.post("/simulations/benchmark", json={"num_simulations": 50})
         assert response.status_code == 200
 
         data = response.json()
@@ -87,11 +98,11 @@ class TestSimulationEndpoints:
     def test_batch_simulation_validation(self):
         """Test batch simulation input validation."""
         # Test too few simulations
-        response = client.post("/game/stats", json={"num_simulations": 0})
+        response = client.post("/simulations/benchmark", json={"num_simulations": 0})
         assert response.status_code == 422  # Validation error
 
         # Test too many simulations
-        response = client.post("/game/stats", json={"num_simulations": 20000})
+        response = client.post("/simulations/benchmark", json={"num_simulations": 20000})
         assert response.status_code == 422  # Validation error
 
 
