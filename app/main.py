@@ -3,8 +3,11 @@ from contextlib import asynccontextmanager
 import uvicorn
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
 
 from app.infrastructure.api.routes import router
+from app.infrastructure.api.rate_limiter import limiter, rate_limit_exceeded_handler
 from app.core.config import settings
 from app.infrastructure.logging.logger import setup_logging
 from app.infrastructure.di.container import get_logger
@@ -32,6 +35,11 @@ app = FastAPI(
     docs_url=settings.DOC_URL,
     lifespan=lifespan,
 )
+
+# Configure rate limiting
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, rate_limit_exceeded_handler)
+app.add_middleware(SlowAPIMiddleware)
 
 app.include_router(router)
 
