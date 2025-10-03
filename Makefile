@@ -25,6 +25,9 @@ help:
 	@echo "  make docker-test-unit        - Run unit tests in Docker"
 	@echo "  make docker-test-integration - Run integration tests in Docker"
 
+install:
+	uv sync && uv pip install -e .
+
 setup-dev:
 	@bash setup-dev.sh
 
@@ -66,7 +69,7 @@ clean:
 	rm -rf htmlcov
 
 docker-build:
-	docker-compose build
+	docker-compose build --no-cache
 
 docker-up:
 	docker-compose up

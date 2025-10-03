@@ -2,7 +2,7 @@
 name = "monopoly-simulator-api"
 version = "1.0.0"
 description = "A simplified Monopoly-style board game simulation API with clean architecture"
-requires-python = ">=3.12"
+requires-python = ">=3.13"
 dependencies = [
     "fastapi>=0.118.0",
     "pydantic>=2.11.9",
@@ -35,7 +35,7 @@ packages = ["app"]
 
 [tool.black]
 line-length = 100
-target-version = ["py312"]
+target-version = ["py313"]
 include = '\.pyi?$'
 extend-exclude = '''
 /(
@@ -52,7 +52,7 @@ extend-exclude = '''
 '''
 
 [tool.mypy]
-python_version = "3.12"
+python_version = "3.13"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true

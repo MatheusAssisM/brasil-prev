@@ -8,9 +8,12 @@
 
 ```bash
 # Iniciar aplicação
+cp .env-sample .env
 make docker-up
 
 # Sem docker
+cp .env-sample .env
+make install
 make run
 ```
 
@@ -101,7 +104,7 @@ make setup-dev
 ```
 
 **O que isso faz:**
-- Instala dependências (Python 3.12 + uv necessário)
+- Instala dependências (Python 3.13 + uv necessário)
 - Configura pre-push hook para verificações de qualidade
 - Formata código inicial
 - Roda verificações de qualidade

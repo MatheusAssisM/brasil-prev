@@ -79,6 +79,8 @@ cd brasil-prev
 make docker-up
 
 # Sem docker
+cp .env-sample .env
+make install
 make run
 ```
 
@@ -92,7 +94,7 @@ make docker-down
 ### Local Development Setup (Optional)
 
 For development, you'll need:
-- Python 3.12+
+- Python 3.13+
 - [uv](https://github.com/astral-sh/uv) package manager
 
 ```bash
@@ -169,7 +171,7 @@ Visit `http://localhost:8000/` for Swagger UI documentation.
 
 ### Quick Setup for New Developers
 
-**Requirements:** Python 3.12+ and [uv](https://github.com/astral-sh/uv) installed.
+**Requirements:** Python 3.13+ and [uv](https://github.com/astral-sh/uv) installed.
 
 ```bash
 # Automated setup (installs dependencies + configures pre-push hooks)
