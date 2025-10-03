@@ -5,6 +5,7 @@ from app.domain.engine import GameEngine
 from app.domain.strategies import ImpulsiveStrategy, DemandingStrategy
 from app.infrastructure.generators.random import RandomBoardGenerator, StandardDiceRoller
 from app.infrastructure.di.container import get_logger
+from app.core.exceptions import GameConfigurationError, InvalidGameStateError
 
 
 @pytest.mark.unit
@@ -169,3 +170,77 @@ class TestGameEngine:
         assert "timeout" in result
         assert "players" in result
         assert len(result["players"]) == 2
+
+    def test_engine_creation_empty_players_raises_error(self):
+        """Test creating engine with empty players list raises error."""
+        generator = RandomBoardGenerator()
+        board = generator.generate(20)
+        logger = get_logger("test")
+
+        with pytest.raises(GameConfigurationError) as exc_info:
+            GameEngine([], board, logger)
+
+        assert "empty" in str(exc_info.value).lower()
+
+    def test_engine_creation_none_board_raises_error(self):
+        """Test creating engine with None board raises error."""
+        players = [Player("Test", ImpulsiveStrategy())]
+        logger = get_logger("test")
+
+        with pytest.raises(GameConfigurationError) as exc_info:
+            GameEngine(players, None, logger)
+
+        assert "board" in str(exc_info.value).lower()
+
+    def test_roll_dice_without_injected_roller(self):
+        """Test that roll_dice works without injected dice roller."""
+        players = [Player("Test", ImpulsiveStrategy())]
+        generator = RandomBoardGenerator()
+        board = generator.generate(20)
+        logger = get_logger("test")
+        engine = GameEngine(players, board, logger)
+
+        # Roll without injecting dice roller
+        for _ in range(100):
+            roll = engine.roll_dice()
+            assert 1 <= roll <= 6
+
+    def test_play_turn_none_player_raises_error(self):
+        """Test playing turn with None player raises error."""
+        players = [Player("Test", ImpulsiveStrategy())]
+        generator = RandomBoardGenerator()
+        board = generator.generate(20)
+        logger = get_logger("test")
+        engine = GameEngine(players, board, logger)
+
+        with pytest.raises(InvalidGameStateError) as exc_info:
+            engine.play_turn(None)
+
+        assert "player" in str(exc_info.value).lower()
+
+    def test_handle_property_landing_none_player_raises_error(self):
+        """Test handling property landing with None player raises error."""
+        players = [Player("Test", ImpulsiveStrategy())]
+        generator = RandomBoardGenerator()
+        board = generator.generate(20)
+        logger = get_logger("test")
+        engine = GameEngine(players, board, logger)
+        prop = board.get_property(0)
+
+        with pytest.raises(InvalidGameStateError) as exc_info:
+            engine._handle_property_landing(None, prop)
+
+        assert "player" in str(exc_info.value).lower()
+
+    def test_handle_property_landing_none_property_raises_error(self):
+        """Test handling property landing with None property raises error."""
+        player = Player("Test", ImpulsiveStrategy())
+        generator = RandomBoardGenerator()
+        board = generator.generate(20)
+        logger = get_logger("test")
+        engine = GameEngine([player], board, logger)
+
+        with pytest.raises(InvalidGameStateError) as exc_info:
+            engine._handle_property_landing(player, None)
+
+        assert "property" in str(exc_info.value).lower()

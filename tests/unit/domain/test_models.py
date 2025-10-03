@@ -3,6 +3,12 @@ import pytest
 
 from app.domain.strategies import ImpulsiveStrategy
 from app.infrastructure.generators.random import RandomBoardGenerator
+from app.core.exceptions import (
+    InvalidPropertyError,
+    InvalidPlayerError,
+    InvalidMoveError,
+    GameConfigurationError,
+)
 
 
 @pytest.mark.unit
@@ -32,6 +38,27 @@ class TestProperty:
         prop_without_owner = prop_with_owner.reset_owner()
         assert not prop_without_owner.is_owned()
         assert prop_without_owner.owner is None
+
+    def test_property_negative_cost_raises_error(self):
+        """Test creating property with negative cost raises error."""
+        with pytest.raises(InvalidPropertyError) as exc_info:
+            Property(cost=-100, rent=50)
+
+        assert "cost" in str(exc_info.value).lower()
+
+    def test_property_zero_cost_raises_error(self):
+        """Test creating property with zero cost raises error."""
+        with pytest.raises(InvalidPropertyError) as exc_info:
+            Property(cost=0, rent=50)
+
+        assert "cost" in str(exc_info.value).lower()
+
+    def test_property_negative_rent_raises_error(self):
+        """Test creating property with negative rent raises error."""
+        with pytest.raises(InvalidPropertyError) as exc_info:
+            Property(cost=100, rent=-50)
+
+        assert "rent" in str(exc_info.value).lower()
 
 
 @pytest.mark.unit
@@ -120,6 +147,106 @@ class TestPlayer:
         assert len(player.properties) == 0
         assert len(released_properties) == 2
         # Note: owner reset is now handled by GameEngine/Board repository
+
+    def test_player_empty_name_raises_error(self):
+        """Test creating player with empty name raises error."""
+        with pytest.raises(InvalidPlayerError) as exc_info:
+            Player("", ImpulsiveStrategy())
+
+        assert "name" in str(exc_info.value).lower()
+
+    def test_player_whitespace_name_raises_error(self):
+        """Test creating player with whitespace name raises error."""
+        with pytest.raises(InvalidPlayerError) as exc_info:
+            Player("   ", ImpulsiveStrategy())
+
+        assert "name" in str(exc_info.value).lower()
+
+    def test_player_negative_balance_raises_error(self):
+        """Test creating player with negative balance raises error."""
+        with pytest.raises(InvalidPlayerError) as exc_info:
+            Player("Test", ImpulsiveStrategy(), initial_balance=-100)
+
+        assert "balance" in str(exc_info.value).lower()
+
+    def test_player_none_strategy_raises_error(self):
+        """Test creating player with None strategy raises error."""
+        with pytest.raises(InvalidPlayerError) as exc_info:
+            Player("Test", None)
+
+        assert "strategy" in str(exc_info.value).lower()
+
+    def test_player_move_negative_steps_raises_error(self):
+        """Test moving player with negative steps raises error."""
+        player = Player("Test", ImpulsiveStrategy())
+
+        with pytest.raises(InvalidMoveError) as exc_info:
+            player.move(-5, 20)
+
+        assert "steps" in str(exc_info.value).lower()
+
+    def test_player_move_zero_steps_raises_error(self):
+        """Test moving player with zero steps raises error."""
+        player = Player("Test", ImpulsiveStrategy())
+
+        with pytest.raises(InvalidMoveError) as exc_info:
+            player.move(0, 20)
+
+        assert "steps" in str(exc_info.value).lower()
+
+    def test_player_move_invalid_board_size_raises_error(self):
+        """Test moving player with invalid board size raises error."""
+        player = Player("Test", ImpulsiveStrategy())
+
+        with pytest.raises(InvalidMoveError) as exc_info:
+            player.move(5, 0)
+
+        assert "board size" in str(exc_info.value).lower()
+
+    def test_player_move_negative_salary_raises_error(self):
+        """Test moving player with negative salary raises error."""
+        player = Player("Test", ImpulsiveStrategy())
+
+        with pytest.raises(InvalidMoveError) as exc_info:
+            player.move(5, 20, round_salary=-100)
+
+        assert "salary" in str(exc_info.value).lower()
+
+    def test_player_can_buy_negative_cost_raises_error(self):
+        """Test can_buy with negative cost raises error."""
+        player = Player("Test", ImpulsiveStrategy())
+
+        with pytest.raises(InvalidPropertyError) as exc_info:
+            player.can_buy(-100)
+
+        assert "cost" in str(exc_info.value).lower()
+
+    def test_player_buy_property_none_raises_error(self):
+        """Test buying None property raises error."""
+        player = Player("Test", ImpulsiveStrategy())
+
+        with pytest.raises(InvalidPropertyError) as exc_info:
+            player.buy_property(None)
+
+        assert "property" in str(exc_info.value).lower()
+
+    def test_player_pay_rent_negative_raises_error(self):
+        """Test paying negative rent raises error."""
+        player = Player("Test", ImpulsiveStrategy())
+
+        with pytest.raises(InvalidPropertyError) as exc_info:
+            player.pay_rent(-50)
+
+        assert "rent" in str(exc_info.value).lower()
+
+    def test_player_receive_rent_negative_raises_error(self):
+        """Test receiving negative rent raises error."""
+        player = Player("Test", ImpulsiveStrategy())
+
+        with pytest.raises(InvalidPropertyError) as exc_info:
+            player.receive_rent(-50)
+
+        assert "rent" in str(exc_info.value).lower()
 
 
 @pytest.mark.unit
@@ -241,3 +368,61 @@ class TestGameState:
 
         state.increment_round()
         assert state.round_count == 2
+
+    def test_game_state_empty_players_raises_error(self):
+        """Test creating game state with empty players raises error."""
+        generator = RandomBoardGenerator()
+        board = generator.generate(20)
+
+        with pytest.raises(GameConfigurationError) as exc_info:
+            GameState([], board)
+
+        assert "empty" in str(exc_info.value).lower()
+
+    def test_game_state_none_board_raises_error(self):
+        """Test creating game state with None board raises error."""
+        players = [Player("Test", ImpulsiveStrategy())]
+
+        with pytest.raises(GameConfigurationError) as exc_info:
+            GameState(players, None)
+
+        assert "board" in str(exc_info.value).lower()
+
+    def test_game_state_negative_max_rounds_raises_error(self):
+        """Test creating game state with negative max rounds raises error."""
+        generator = RandomBoardGenerator()
+        players = [Player("Test", ImpulsiveStrategy())]
+        board = generator.generate(20)
+
+        with pytest.raises(GameConfigurationError) as exc_info:
+            GameState(players, board, max_rounds=-100)
+
+        assert "max rounds" in str(exc_info.value).lower()
+
+    def test_game_state_zero_max_rounds_raises_error(self):
+        """Test creating game state with zero max rounds raises error."""
+        generator = RandomBoardGenerator()
+        players = [Player("Test", ImpulsiveStrategy())]
+        board = generator.generate(20)
+
+        with pytest.raises(GameConfigurationError) as exc_info:
+            GameState(players, board, max_rounds=0)
+
+        assert "max rounds" in str(exc_info.value).lower()
+
+    def test_victory_condition_no_players_left(self):
+        """Test victory when no players are left (draw)."""
+        generator = RandomBoardGenerator()
+        players = [Player(f"Player {i}", ImpulsiveStrategy()) for i in range(2)]
+        board = generator.generate(20)
+        state = GameState(players, board)
+
+        # Eliminate all players
+        for player in players:
+            player.is_active = False
+
+        result = state.check_victory_condition()
+
+        assert result is True
+        assert state.game_over is True
+        assert state.winner is None

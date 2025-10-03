@@ -37,3 +37,46 @@ class TestPropertyRepository:
         for prop in properties:
             assert 50 <= prop.cost <= 200
             assert 10 <= prop.rent <= 100
+
+    def test_get_property_out_of_range_raises_error(self, board_generator):
+        """Test getting property at invalid position raises error."""
+        board = board_generator.generate(20)
+
+        with pytest.raises(IndexError):
+            board.repository.get_property(25)
+
+        with pytest.raises(IndexError):
+            board.repository.get_property(-1)
+
+    def test_set_owner_out_of_range_raises_error(self, board_generator):
+        """Test setting owner at invalid position raises error."""
+        board = board_generator.generate(20)
+        player = Player("Test", ImpulsiveStrategy())
+
+        with pytest.raises(IndexError):
+            board.repository.set_owner(25, player)
+
+        with pytest.raises(IndexError):
+            board.repository.set_owner(-1, player)
+
+    def test_get_owner(self, board_generator):
+        """Test getting property owner."""
+        board = board_generator.generate(20)
+        player = Player("Test", ImpulsiveStrategy())
+
+        # Initially no owner
+        assert board.repository.get_owner(0) is None
+
+        # Set owner
+        board.set_property_owner(0, player)
+        assert board.repository.get_owner(0) == player
+
+    def test_get_owner_out_of_range_raises_error(self, board_generator):
+        """Test getting owner at invalid position raises error."""
+        board = board_generator.generate(20)
+
+        with pytest.raises(IndexError):
+            board.repository.get_owner(25)
+
+        with pytest.raises(IndexError):
+            board.repository.get_owner(-1)

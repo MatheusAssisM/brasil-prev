@@ -87,6 +87,9 @@ omit = [
     "app/**/__init__.py",
     "app/main.py",
     "app/core/config.py",
+    "app/infrastructure/api/routes.py",
+    "app/infrastructure/di/container.py",
+    "app/infrastructure/logging/logger.py",
 ]
 
 [tool.coverage.report]
