@@ -140,19 +140,6 @@ cp .env-sample .env
 # Edite o .env conforme necessário
 ```
 
-**Principais variáveis** (prefixo `MONOPOLY_`):
-
-| Variável | Padrão | Descrição |
-|----------|--------|-----------|
-| `MONOPOLY_DEBUG` | `false` | Modo debug |
-| `MONOPOLY_LOG_LEVEL` | `WARNING` | Nível de log (DEBUG, INFO, WARNING, ERROR) |
-| `MONOPOLY_API_HOST` | `0.0.0.0` | Host da API |
-| `MONOPOLY_API_PORT` | `8000` | Porta da API |
-| `MONOPOLY_APP_NAME` | `Brasil Prev - Monopoly Simulator API` | Nome da aplicação |
-| `MONOPOLY_DOC_URL` | `/` | Caminho da documentação Swagger |
-
----
-
 ## 📋 Regras do Jogo
 
 - **Tabuleiro**: 20 propriedades com custos (50-200) e aluguéis (10-100) aleatórios
