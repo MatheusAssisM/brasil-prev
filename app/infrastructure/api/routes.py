@@ -58,13 +58,15 @@ class BatchSimulationResult(BaseModel):
 @router.post("/game/simulate", response_model=GameResult, tags=["Simulation"])
 @limiter.limit(settings.RATE_LIMIT_DEFAULT)
 async def simulate_game(
-    request: Request,
+    request: Request,  # pylint: disable=unused-argument
     simulator: SimulatorService = Depends(get_simulator_service),
 ) -> GameResult:
     """
     Run a single game simulation with 4 players using different strategies.
 
     Returns the winner strategy name and list of all player strategies.
+
+    Note: request parameter is required by SlowAPI rate limiter decorator.
     """
     try:
         result = simulator.run_single_simulation()
@@ -91,7 +93,7 @@ async def simulate_game(
 @router.post("/simulations/benchmark", response_model=BatchSimulationResult, tags=["Simulation"])
 @limiter.limit(settings.RATE_LIMIT_BENCHMARK)
 async def run_benchmark_simulation(
-    request: Request,
+    request: Request,  # pylint: disable=unused-argument
     body: BatchSimulationRequest,
     simulator: SimulatorService = Depends(get_simulator_service),
 ) -> BatchSimulationResult:
@@ -100,6 +102,8 @@ async def run_benchmark_simulation(
 
     This endpoint runs batch simulations using parallel processing across multiple CPU cores
     and provides detailed performance metrics including execution time and throughput.
+
+    Note: request parameter is required by SlowAPI rate limiter decorator.
     """
     try:
         result = simulator.run_batch_simulation(body.num_simulations)

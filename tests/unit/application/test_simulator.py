@@ -1,5 +1,4 @@
 import pytest
-from unittest.mock import MagicMock
 from collections import defaultdict
 
 from app.core.exceptions import GameConfigurationError

@@ -29,12 +29,14 @@ limiter = Limiter(
 )
 
 
-def rate_limit_exceeded_handler(request: Request, exc: RateLimitExceeded) -> JSONResponse:
+def rate_limit_exceeded_handler(
+    request: Request, exc: RateLimitExceeded  # pylint: disable=unused-argument
+) -> JSONResponse:
     """
     Custom handler for rate limit exceeded errors.
 
     Args:
-        request: FastAPI request object
+        request: FastAPI request object (required by FastAPI exception handler interface)
         exc: RateLimitExceeded exception
 
     Returns:
