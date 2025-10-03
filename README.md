@@ -1,27 +1,12 @@
 # Brasil Prev - Monopoly Game Simulator
 
-A Python-based simulation of a simplified Monopoly-style board game with clean architecture, strategy pattern implementation, and FastAPI HTTP endpoints.
+<p align="center">
+  <img src="assets/bank-image.png" alt="Bank Image" />
+  <br/>
+  <em>A Python-based simulation of a simplified Monopoly-style board game</em>
+</p>
 
 ## Features
-
-- **Clean Architecture**: Hexagonal architecture with clear separation of layers
-- **Domain-Driven Design**: Core business logic isolated from infrastructure concerns
-- **Strategy Pattern**: 4 distinct player behaviors without conditional logic
-  - **Impulsive**: Always buys properties when possible
-  - **Demanding**: Only buys properties with rent above 50
-  - **Cautious**: Only buys if balance remains above 80 after purchase
-  - **Random**: 50% chance to buy any property
-- **Factory Pattern**: Centralized player creation with `PlayerFactory`
-- **Repository Pattern**: In-memory property repository for entity storage
-- **Dependency Injection**: Container-based DI for loose coupling
-- **Parallel Processing**: Multi-core batch simulations for high performance
-- **Comprehensive Type Hints**: Full typing support using Python's `typing` module
-- **Game Rules**:
-  - 20 properties with random costs (50-200) and rents (10-100)
-  - 4 players start with 300 balance
-  - Players earn 100 salary per complete board round
-  - Elimination when balance < 0
-  - Victory: Last player standing OR highest balance after 1000 rounds
 - **FastAPI REST API**: Run single or batch simulations via HTTP with performance metrics
 
 ## Project Structure
@@ -74,12 +59,12 @@ brasil-prev/
 # Clone the repository
 git clone <repository-url>
 cd brasil-prev
+cp .env-sample .env
 
 # Start the application
 make docker-up
 
-# Sem docker
-cp .env-sample .env
+# Without docker
 make install
 make run
 ```
