@@ -4,7 +4,8 @@ A Python-based simulation of a simplified Monopoly-style board game with clean a
 
 ## Features
 
-- **Clean Domain-Driven Design**: Separation of concerns with domain models, strategies, and game engine
+- **Clean Architecture**: Hexagonal architecture with clear separation of layers
+- **Domain-Driven Design**: Core business logic isolated from infrastructure concerns
 - **Strategy Pattern**: 4 distinct player behaviors without conditional logic
   - **Impulsive**: Always buys properties when possible
   - **Demanding**: Only buys properties with rent above 50
@@ -12,7 +13,8 @@ A Python-based simulation of a simplified Monopoly-style board game with clean a
   - **Random**: 50% chance to buy any property
 - **Factory Pattern**: Centralized player creation with `PlayerFactory`
 - **Repository Pattern**: In-memory property repository for entity storage
-- **Immutable Data**: Properties implemented as frozen dataclasses
+- **Dependency Injection**: Container-based DI for loose coupling
+- **Parallel Processing**: Multi-core batch simulations for high performance
 - **Comprehensive Type Hints**: Full typing support using Python's `typing` module
 - **Game Rules**:
   - 20 properties with random costs (50-200) and rents (10-100)
@@ -20,44 +22,48 @@ A Python-based simulation of a simplified Monopoly-style board game with clean a
   - Players earn 100 salary per complete board round
   - Elimination when balance < 0
   - Victory: Last player standing OR highest balance after 1000 rounds
-- **FastAPI REST API**: Run single or batch simulations via HTTP
+- **FastAPI REST API**: Run single or batch simulations via HTTP with performance metrics
 
 ## Project Structure
 
 ```
-monopoly-simulator-api/
+brasil-prev/
 ├── app/
-│   ├── core/               # Contracts, abstractions, configs
-│   │   ├── interfaces.py   # PurchaseStrategy interface
-│   │   └── config.py       # GameConfig, Settings
+│   ├── core/                      # Core abstractions and configurations
+│   │   ├── interfaces.py          # Abstract interfaces (Strategy, Repository, etc.)
+│   │   ├── config.py              # GameConfig, Settings
+│   │   └── exceptions.py          # Custom exceptions
 │   │
-│   ├── game/               # Domain logic (business rules)
-│   │   ├── models.py       # Player, Property (dataclass), Board, GameState
-│   │   ├── strategies.py   # Strategy implementations
-│   │   ├── factories.py    # Factory pattern for player creation
-│   │   ├── repositories.py # Repository pattern for property storage
-│   │   └── engine.py       # Game engine (turn execution, rules)
+│   ├── domain/                    # Domain layer (business rules)
+│   │   ├── models.py              # Player, Property, Board, GameState
+│   │   ├── strategies.py          # Strategy implementations
+│   │   ├── factories.py           # Player factory
+│   │   └── engine.py              # Game engine (turn execution, rules)
 │   │
-│   ├── services/           # Application services (use cases)
-│   │   └── simulator.py    # Game simulation orchestration
+│   ├── application/               # Application layer (use cases)
+│   │   ├── simulator.py           # Game simulation orchestration
+│   │   └── worker.py              # Worker for parallel processing
 │   │
-│   ├── api/                # HTTP interface (infrastructure)
-│   │   └── routes.py       # FastAPI endpoints and models
+│   ├── infrastructure/            # Infrastructure layer
+│   │   ├── api/                   # HTTP interface
+│   │   │   └── routes.py          # FastAPI endpoints and models
+│   │   ├── persistence/           # Data persistence
+│   │   │   └── repositories.py    # Property repository implementation
+│   │   ├── generators/            # Random generators
+│   │   │   └── random.py          # Dice roller, board generator
+│   │   ├── logging/               # Structured logging
+│   │   │   └── logger.py          # JSON logger configuration
+│   │   └── di/                    # Dependency injection
+│   │       └── container.py       # DI container
 │   │
-│   ├── utils/              # Helper utilities
-│   │   └── randomizer.py   # Dice rolls, board generation
-│   │
-│   └── main.py             # FastAPI app entrypoint
+│   └── main.py                    # FastAPI app entrypoint
 │
-├── tests/                  # Test suite (44 tests)
-│   ├── test_strategies.py
-│   ├── test_domain.py
-│   ├── test_game_engine.py
-│   └── test_api.py
+├── tests/                         # Test suite
+│   ├── unit/                      # Unit tests
+│   └── integration/               # Integration tests
 │
-├── COMMENTS.md             # Step-by-step execution guide
-├── ARCHITECTURE.md         # Architecture documentation
-└── pyproject.toml          # Project configuration
+├── COMMENTS.md                    # Step-by-step execution guide
+└── pyproject.toml                 # Project configuration
 ```
 
 ## Installation & Usage
