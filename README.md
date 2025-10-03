@@ -91,6 +91,15 @@ For development, you'll need:
 make setup-dev
 ```
 
+**Environment Configuration:**
+
+Copy `.env-sample` to `.env` and adjust settings as needed:
+```bash
+cp .env-sample .env
+```
+
+All settings have defaults and can be overridden via environment variables prefixed with `MONOPOLY_`. See `.env-sample` for available options.
+
 ### API Endpoints
 
 #### Health Check
