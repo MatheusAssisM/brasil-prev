@@ -13,42 +13,42 @@ class Money:
     Immutable to prevent accidental modifications.
     """
 
-    amount: int
+    amount: float
 
     def __post_init__(self) -> None:
         """Validate money amount on creation."""
-        if not isinstance(self.amount, int):
-            raise TypeError(f"Money amount must be an integer, got {type(self.amount).__name__}")
+        if not isinstance(self.amount, (int, float)):
+            raise TypeError(f"Money amount must be int or float, got {type(self.amount).__name__}")
 
-    def add(self, other: Union[Money, int]) -> Money:
+    def add(self, other: Union[Money, int, float]) -> Money:
         """
         Add money amounts.
 
         Args:
-            other: Money instance or integer to add
+            other: Money instance, integer, or float to add
 
         Returns:
             New Money instance with sum
         """
         if isinstance(other, Money):
             return Money(self.amount + other.amount)
-        if isinstance(other, int):
+        if isinstance(other, (int, float)):
             return Money(self.amount + other)
         raise TypeError(f"Cannot add Money with {type(other).__name__}")
 
-    def subtract(self, other: Union[Money, int]) -> Money:
+    def subtract(self, other: Union[Money, int, float]) -> Money:
         """
         Subtract money amounts.
 
         Args:
-            other: Money instance or integer to subtract
+            other: Money instance, integer, or float to subtract
 
         Returns:
             New Money instance with difference (can be negative)
         """
         if isinstance(other, Money):
             return Money(self.amount - other.amount)
-        if isinstance(other, int):
+        if isinstance(other, (int, float)):
             return Money(self.amount - other)
         raise TypeError(f"Cannot subtract {type(other).__name__} from Money")
 
@@ -64,55 +64,55 @@ class Money:
         """Check if amount is zero."""
         return self.amount == 0
 
-    def is_sufficient_for(self, cost: Union[Money, int]) -> bool:
+    def is_sufficient_for(self, cost: Union[Money, int, float]) -> bool:
         """
         Check if this amount is sufficient to cover a cost.
 
         Args:
-            cost: Money instance or integer representing cost
+            cost: Money instance, integer, or float representing cost
 
         Returns:
             True if amount >= cost, False otherwise
         """
         if isinstance(cost, Money):
             return self.amount >= cost.amount
-        if isinstance(cost, int):
+        if isinstance(cost, (int, float)):
             return self.amount >= cost
         raise TypeError(f"Cannot compare Money with {type(cost).__name__}")
 
     def __int__(self) -> int:
         """Convert to integer."""
-        return self.amount
+        return int(self.amount)
 
-    def __lt__(self, other: Union[Money, int]) -> bool:
+    def __lt__(self, other: Union[Money, int, float]) -> bool:
         """Less than comparison."""
         if isinstance(other, Money):
             return self.amount < other.amount
-        if isinstance(other, int):
+        if isinstance(other, (int, float)):
             return self.amount < other
         return NotImplemented
 
-    def __le__(self, other: Union[Money, int]) -> bool:
+    def __le__(self, other: Union[Money, int, float]) -> bool:
         """Less than or equal comparison."""
         if isinstance(other, Money):
             return self.amount <= other.amount
-        if isinstance(other, int):
+        if isinstance(other, (int, float)):
             return self.amount <= other
         return NotImplemented
 
-    def __gt__(self, other: Union[Money, int]) -> bool:
+    def __gt__(self, other: Union[Money, int, float]) -> bool:
         """Greater than comparison."""
         if isinstance(other, Money):
             return self.amount > other.amount
-        if isinstance(other, int):
+        if isinstance(other, (int, float)):
             return self.amount > other
         return NotImplemented
 
-    def __ge__(self, other: Union[Money, int]) -> bool:
+    def __ge__(self, other: Union[Money, int, float]) -> bool:
         """Greater than or equal comparison."""
         if isinstance(other, Money):
             return self.amount >= other.amount
-        if isinstance(other, int):
+        if isinstance(other, (int, float)):
             return self.amount >= other
         return NotImplemented
 
