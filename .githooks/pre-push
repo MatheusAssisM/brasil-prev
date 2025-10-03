@@ -1,0 +1,28 @@
+#!/bin/bash
+# Pre-push Git hook
+# Runs quality checks and coverage before allowing a push
+
+set -e
+
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+echo -e "${YELLOW}🔍 Running quality checks...${NC}"
+if make quality; then
+    echo -e "${GREEN}✓ Quality checks passed!${NC}"
+else
+    echo -e "${RED}✗ Quality checks failed. Fix the issues before pushing.${NC}"
+    exit 1
+fi
+
+echo -e "${YELLOW}🧪 Running coverage tests...${NC}"
+if make coverage; then
+    echo -e "${GREEN}✓ Coverage requirements met!${NC}"
+else
+    echo -e "${RED}✗ Coverage did not meet required threshold. Push aborted.${NC}"
+    exit 1
+fi
+
+echo -e "${GREEN}✅ All checks passed! Proceeding with push.${NC}"

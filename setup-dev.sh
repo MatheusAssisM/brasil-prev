@@ -8,6 +8,8 @@ set -e
 echo "🚀 Setting up development environment for Monopoly Simulator API"
 echo ""
 
+HOOK_SRC=".githooks/pre-push"
+HOOK_DST=".git/hooks/pre-push"
 # Colors for output
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -32,11 +34,12 @@ echo -e "${GREEN}✓ Project installed${NC}"
 echo ""
 
 echo -e "${BLUE}3/4 Setting up pre-push hook...${NC}"
-if [ -f ".git/hooks/pre-push" ]; then
-    chmod +x .git/hooks/pre-push
-    echo -e "${GREEN}✓ Pre-push hook configured${NC}"
+if [ -f "$HOOK_SRC" ]; then
+    cp "$HOOK_SRC" "$HOOK_DST"
+    chmod +x "$HOOK_DST"
+    echo -e "${GREEN}✓ Pre-push hook installed${NC}"
 else
-    echo -e "${YELLOW}⚠️  Pre-push hook file not found. This is unexpected.${NC}"
+    echo -e "${YELLOW}⚠️  No pre-push hook found at $HOOK_SRC${NC}"
 fi
 echo ""
 
