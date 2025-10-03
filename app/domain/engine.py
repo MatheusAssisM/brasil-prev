@@ -1,5 +1,7 @@
 from typing import Callable, Dict, Any, List, Optional
 import uuid
+import random
+
 
 from app.domain.models import Player, Board, GameState, Property
 from app.core.config import GameConfig
@@ -51,9 +53,6 @@ class GameEngine:
         """Roll a standard 6-sided die."""
         if self.dice_roller:
             return self.dice_roller()
-        # Fallback to default
-        import random
-
         return random.randint(1, 6)
 
     def play_turn(self, player: Player) -> None:

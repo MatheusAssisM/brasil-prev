@@ -26,6 +26,7 @@ class TestImpulsiveStrategy:
         assert strategy.get_name() == "impulsive"
 
 
+@pytest.mark.unit
 class TestDemandingStrategy:
     """Test the Demanding strategy."""
 
@@ -51,6 +52,7 @@ class TestDemandingStrategy:
         assert strategy.get_name() == "demanding"
 
 
+@pytest.mark.unit
 class TestCautiousStrategy:
     """Test the Cautious strategy."""
 
@@ -78,6 +80,7 @@ class TestCautiousStrategy:
         assert strategy.get_name() == "cautious"
 
 
+@pytest.mark.unit
 class TestRandomStrategy:
     """Test the Random strategy."""
 
