@@ -1,9 +1,11 @@
 from typing import List, Optional
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Request
 from pydantic import BaseModel, Field
 
 from app.core.interfaces import SimulatorService
+from app.core.config import settings
 from app.infrastructure.di.container import get_simulator_service, get_logger
+from app.infrastructure.api.rate_limiter import limiter
 
 router = APIRouter()
 logger = get_logger("app.infrastructure.api.routes")
@@ -54,7 +56,9 @@ class BatchSimulationResult(BaseModel):
 
 # Routes
 @router.post("/game/simulate", response_model=GameResult, tags=["Simulation"])
+@limiter.limit(settings.RATE_LIMIT_DEFAULT)
 async def simulate_game(
+    request: Request,
     simulator: SimulatorService = Depends(get_simulator_service),
 ) -> GameResult:
     """
@@ -85,8 +89,10 @@ async def simulate_game(
 
 
 @router.post("/simulations/benchmark", response_model=BatchSimulationResult, tags=["Simulation"])
+@limiter.limit(settings.RATE_LIMIT_BENCHMARK)
 async def run_benchmark_simulation(
-    request: BatchSimulationRequest,
+    request: Request,
+    body: BatchSimulationRequest,
     simulator: SimulatorService = Depends(get_simulator_service),
 ) -> BatchSimulationResult:
     """
@@ -96,7 +102,7 @@ async def run_benchmark_simulation(
     and provides detailed performance metrics including execution time and throughput.
     """
     try:
-        result = simulator.run_batch_simulation(request.num_simulations)
+        result = simulator.run_batch_simulation(body.num_simulations)
 
         return BatchSimulationResult(
             total_simulations=result["total_simulations"],
@@ -122,7 +128,7 @@ async def run_benchmark_simulation(
     except Exception as e:
         logger.error(
             "Batch simulation failed",
-            extra={"num_simulations": request.num_simulations, "error": str(e)},
+            extra={"num_simulations": body.num_simulations, "error": str(e)},
             exc_info=True,
         )
         raise HTTPException(status_code=500, detail=f"Batch simulation failed: {str(e)}") from e
