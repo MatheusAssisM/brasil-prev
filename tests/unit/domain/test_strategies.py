@@ -1,3 +1,4 @@
+from app.domain.value_objects import Money
 from app.domain.models import Player, Property
 from app.domain.strategies import (
     ImpulsiveStrategy,
@@ -16,7 +17,7 @@ class TestImpulsiveStrategy:
         """Impulsive player should always want to buy."""
         strategy = ImpulsiveStrategy()
         player = Player("Test", strategy, initial_balance=300)
-        property = Property(cost=100, rent=50)
+        property = Property(cost=Money(100), rent=Money(50))
 
         assert strategy.should_buy(player, property) is True
 
@@ -34,7 +35,7 @@ class TestDemandingStrategy:
         """Demanding player should buy properties with rent > threshold."""
         strategy = DemandingStrategy(rent_threshold=50)
         player = Player("Test", strategy, initial_balance=300)
-        property = Property(cost=100, rent=60)
+        property = Property(cost=Money(100), rent=Money(60))
 
         assert strategy.should_buy(player, property) is True
 
@@ -42,7 +43,7 @@ class TestDemandingStrategy:
         """Demanding player should reject properties with rent <= threshold."""
         strategy = DemandingStrategy(rent_threshold=50)
         player = Player("Test", strategy, initial_balance=300)
-        property = Property(cost=100, rent=40)
+        property = Property(cost=Money(100), rent=Money(40))
 
         assert strategy.should_buy(player, property) is False
 
@@ -60,7 +61,7 @@ class TestCautiousStrategy:
         """Cautious player should buy if balance remains above threshold."""
         strategy = CautiousStrategy(reserve_threshold=80)
         player = Player("Test", strategy, initial_balance=300)
-        property = Property(cost=100, rent=50)
+        property = Property(cost=Money(100), rent=Money(50))
 
         # 300 - 100 = 200, which is >= 80
         assert strategy.should_buy(player, property) is True
@@ -69,7 +70,7 @@ class TestCautiousStrategy:
         """Cautious player should reject if balance would drop too low."""
         strategy = CautiousStrategy(reserve_threshold=80)
         player = Player("Test", strategy, initial_balance=150)
-        property = Property(cost=100, rent=50)
+        property = Property(cost=Money(100), rent=Money(50))
 
         # 150 - 100 = 50, which is < 80
         assert strategy.should_buy(player, property) is False
@@ -88,7 +89,7 @@ class TestRandomStrategy:
         """Random player should return varying results."""
         strategy = RandomStrategy()
         player = Player("Test", strategy, initial_balance=300)
-        property = Property(cost=100, rent=50)
+        property = Property(cost=Money(100), rent=Money(50))
 
         # Run multiple times and check we get both True and False
         results = [strategy.should_buy(player, property) for _ in range(100)]

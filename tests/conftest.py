@@ -3,6 +3,7 @@ from fastapi.testclient import TestClient
 
 from app.main import app
 from app.domain.models import Player, Property
+from app.domain.value_objects import Money
 from app.domain.strategies import (
     ImpulsiveStrategy,
     DemandingStrategy,
@@ -40,7 +41,7 @@ def test_logger():
 @pytest.fixture
 def sample_property():
     """Sample property fixture."""
-    return Property(cost=100, rent=50)
+    return Property(cost=Money(100), rent=Money(50))
 
 
 @pytest.fixture
@@ -88,6 +89,12 @@ def cautious_strategy():
 def random_strategy():
     """Random strategy fixture."""
     return RandomStrategy()
+
+
+@pytest.fixture
+def money():
+    """Helper to create Money instances easily in tests."""
+    return Money
 
 
 def pytest_configure(config):

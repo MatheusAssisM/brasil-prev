@@ -1,3 +1,4 @@
+from app.domain.value_objects import Money
 import pytest
 
 from app.domain.factories import PlayerFactory
@@ -12,7 +13,7 @@ class TestPlayerFactory:
         """Test creating impulsive player."""
         player = PlayerFactory.create_impulsive_player()
         assert player.strategy.get_name() == "impulsive"
-        assert player.balance == 300
+        assert int(player.balance) == 300
 
     def test_create_demanding_player(self):
         """Test creating demanding player."""
@@ -43,7 +44,7 @@ class TestPlayerFactory:
     def test_factory_custom_balance(self):
         """Test creating player with custom balance."""
         player = PlayerFactory.create_impulsive_player(balance=500)
-        assert player.balance == 500
+        assert int(player.balance) == 500
 
     def test_factory_custom_name(self):
         """Test creating player with custom name."""

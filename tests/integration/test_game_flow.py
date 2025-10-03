@@ -112,7 +112,7 @@ class TestMockedIntegration:
 
         # Player should have moved 3 steps each turn
         # After 5 turns: 5 * 3 = 15 steps (position 15 on a 20-space board)
-        assert players[0].position == 15
+        assert int(players[0].position) == 15
 
     def test_simulator_with_mocked_logger(self):
         """Test that simulator logs important events."""

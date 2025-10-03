@@ -1,4 +1,5 @@
 from app.domain.models import Player, Property, GameState
+from app.domain.value_objects import Money
 import pytest
 
 from app.domain.strategies import ImpulsiveStrategy
@@ -17,14 +18,14 @@ class TestProperty:
 
     def test_property_creation(self):
         """Test creating a property."""
-        prop = Property(cost=100, rent=50)
-        assert prop.cost == 100
-        assert prop.rent == 50
+        prop = Property(cost=Money(100), rent=Money(50))
+        assert int(prop.cost) == 100
+        assert int(prop.rent) == 50
         assert prop.owner is None
 
     def test_property_ownership(self):
         """Test property ownership (using immutable dataclass pattern)."""
-        prop = Property(cost=100, rent=50)
+        prop = Property(cost=Money(100), rent=Money(50))
         player = Player("Test", ImpulsiveStrategy())
 
         assert not prop.is_owned()
@@ -42,21 +43,21 @@ class TestProperty:
     def test_property_negative_cost_raises_error(self):
         """Test creating property with negative cost raises error."""
         with pytest.raises(InvalidPropertyError) as exc_info:
-            Property(cost=-100, rent=50)
+            Property(cost=Money(-100), rent=Money(50))
 
         assert "cost" in str(exc_info.value).lower()
 
     def test_property_zero_cost_raises_error(self):
         """Test creating property with zero cost raises error."""
         with pytest.raises(InvalidPropertyError) as exc_info:
-            Property(cost=0, rent=50)
+            Property(cost=Money(0), rent=Money(50))
 
         assert "cost" in str(exc_info.value).lower()
 
     def test_property_negative_rent_raises_error(self):
         """Test creating property with negative rent raises error."""
         with pytest.raises(InvalidPropertyError) as exc_info:
-            Property(cost=100, rent=-50)
+            Property(cost=Money(100), rent=Money(-50))
 
         assert "rent" in str(exc_info.value).lower()
 
@@ -71,8 +72,8 @@ class TestPlayer:
         player = Player("Test Player", strategy, initial_balance=300)
 
         assert player.name == "Test Player"
-        assert player.balance == 300
-        assert player.position == 0
+        assert int(player.balance) == 300
+        assert int(player.position) == 0
         assert len(player.properties) == 0
         assert player.is_active is True
 
@@ -84,32 +85,32 @@ class TestPlayer:
         # Move forward
         new_pos = player.move(5, board_size)
         assert new_pos == 5
-        assert player.position == 5
+        assert int(player.position) == 5
 
         # Move with wraparound and salary
-        initial_balance = player.balance
+        initial_balance = int(player.balance)
         new_pos = player.move(18, board_size)
         assert new_pos == 3  # (5 + 18) % 20
-        assert player.balance == initial_balance + 100  # Got salary
+        assert int(player.balance) == initial_balance + 100  # Got salary
 
     def test_player_can_buy(self):
         """Test if player can afford property."""
         player = Player("Test", ImpulsiveStrategy(), initial_balance=150)
 
-        assert player.can_buy(100) is True
-        assert player.can_buy(150) is True
-        assert player.can_buy(200) is False
+        assert player.can_buy(Money(100)) is True
+        assert player.can_buy(Money(150)) is True
+        assert player.can_buy(Money(200)) is False
 
     def test_player_buy_property(self):
         """Test player buying property."""
         strategy = ImpulsiveStrategy()
         player = Player("Test", strategy, initial_balance=300)
-        prop = Property(cost=100, rent=50)
+        prop = Property(cost=Money(100), rent=Money(50))
 
         result = player.buy_property(prop)
 
         assert result is True
-        assert player.balance == 200
+        assert int(player.balance) == 200
         assert len(player.properties) == 1
         # Note: owner assignment is now handled by GameEngine/Board
 
@@ -117,26 +118,26 @@ class TestPlayer:
         """Test player paying rent."""
         player = Player("Test", ImpulsiveStrategy(), initial_balance=100)
 
-        player.pay_rent(50)
-        assert player.balance == 50
+        player.pay_rent(Money(50))
+        assert int(player.balance) == 50
         assert player.is_active is True
 
-        player.pay_rent(100)
-        assert player.balance == -50
+        player.pay_rent(Money(100))
+        assert int(player.balance) == -50
         assert player.is_active is False  # Eliminated
 
     def test_player_receive_rent(self):
         """Test player receiving rent."""
         player = Player("Test", ImpulsiveStrategy(), initial_balance=100)
 
-        player.receive_rent(50)
-        assert player.balance == 150
+        player.receive_rent(Money(50))
+        assert int(player.balance) == 150
 
     def test_player_elimination(self):
         """Test player elimination."""
         player = Player("Test", ImpulsiveStrategy())
-        prop1 = Property(cost=100, rent=50)
-        prop2 = Property(cost=100, rent=50)
+        prop1 = Property(cost=Money(100), rent=Money(50))
+        prop2 = Property(cost=Money(100), rent=Money(50))
 
         # Manually add properties to player
         player.properties = [prop1, prop2]

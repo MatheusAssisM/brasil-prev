@@ -1,3 +1,4 @@
+from app.domain.value_objects import Money, Position
 from app.domain.models import Player
 import pytest
 
@@ -90,18 +91,18 @@ class TestGameEngine:
         prop_with_owner = board.get_property(3)
 
         # Move player2 to that property
-        initial_balance_p1 = player1.balance
-        initial_balance_p2 = player2.balance
+        initial_balance_p1 = int(player1.balance)
+        initial_balance_p2 = int(player2.balance)
 
-        player2.position = 2
+        player2.position = Position(2)
         player2.move(1, board.size())  # Now at position 3
 
         engine._handle_property_landing(player2, prop_with_owner)
 
         # Player2 should have paid rent
-        assert player2.balance == initial_balance_p2 - prop.rent
+        assert int(player2.balance) == initial_balance_p2 - int(prop.rent)
         # Player1 should have received rent
-        assert player1.balance == initial_balance_p1 + prop.rent
+        assert int(player1.balance) == initial_balance_p1 + int(prop.rent)
 
     def test_player_elimination(self):
         """Test that players are eliminated when balance < 0."""
@@ -111,9 +112,9 @@ class TestGameEngine:
         logger = get_logger("test")
         GameEngine([player], board, logger)
 
-        player.pay_rent(50)  # Force negative balance
+        player.pay_rent(Money(50))  # Force negative balance
 
-        assert player.balance < 0
+        assert int(player.balance) < 0
         assert player.is_active is False
 
     def test_play_round(self):
