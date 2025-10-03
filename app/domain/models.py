@@ -181,24 +181,28 @@ class GameState:
         return [p for p in self.players if p.is_active]
 
     def check_victory_condition(self) -> bool:
-        """Check if game has ended and determine winner."""
-        active_players = self.get_active_players()
+        """Check if game has ended and determine winner (optimized with early returns)."""
+        if self.game_over:
+            return True
 
-        if len(active_players) == 1:
+        active_players = self.get_active_players()
+        num_active = len(active_players)
+
+        # Case 1: Single winner
+        if num_active == 1:
             self.winner = active_players[0]
             self.game_over = True
             return True
 
-        if len(active_players) == 0:
+        # Case 2: No players left (draw)
+        if num_active == 0:
             self.game_over = True
             self.winner = None
             return True
 
+        # Case 3: Timeout - winner is player with highest balance
         if self.round_count >= self.max_rounds:
-            if active_players:
-                self.winner = max(active_players, key=lambda p: p.balance)
-            else:
-                self.winner = None
+            self.winner = max(active_players, key=lambda p: p.balance) if active_players else None
             self.game_over = True
             return True
 
