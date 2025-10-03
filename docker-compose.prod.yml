@@ -1,0 +1,47 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ${CONTAINER_NAME:-monopoly-api}
+    env_file:
+      - .env
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    networks:
+      - infra-core_shared-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+      replicas: 1
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
+        window: 120s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.brasil-prev-api.rule=Host(`brasil-prev-api${ENV}.${DOMAIN}`)"
+      - "traefik.http.routers.brasil-prev-api.entrypoints=websecure"
+      - "traefik.http.routers.brasil-prev-api.tls=true"
+      - "traefik.http.routers.brasil-prev-api.tls.certresolver=letsencrypt"
+      - "traefik.http.services.brasil-prev-api.loadbalancer.server.port=8000"
+
+networks:
+  infra-core_shared-network:
+    external: true
