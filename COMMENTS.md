@@ -1,64 +1,40 @@
 # Como Rodar a Aplicação
 
-## Monopoly Simulator API
-
-API REST que simula partidas de um jogo estilo Monopoly com 4 jogadores usando diferentes estratégias de compra.
+> **API REST** que simula partidas de um jogo estilo Monopoly com 4 jogadores usando diferentes estratégias de compra.
 
 ---
 
-## 🚀 Execução Rápida (Docker - Recomendado)
+## 🚀 Execução (Docker - Recomendado)
 
 ```bash
-# 1. Iniciar a aplicação
-docker-compose up --build
-
-# 2. Acessar a API
-# API: http://localhost:8000
-# Documentação interativa: http://localhost:8000
+# Iniciar aplicação
+make docker-up
 ```
 
-**Parar a aplicação:**
+**Acessar:**
+- API: http://localhost:8000
+- Documentação interativa: http://localhost:8000/docs
+
+**Parar aplicação:**
 ```bash
-docker-compose down
+make docker-down
 ```
 
----
-
-## 📦 Execução Local (sem Docker)
-
-### Pré-requisitos
-- Python 3.12+
-- [uv](https://github.com/astral-sh/uv) package manager
-
-### Instalação e Execução
-
+**Ver logs:**
 ```bash
-# 1. Instalar dependências
-uv sync
-uv pip install -e .
-
-# 2. Iniciar a aplicação
-uv run start
-
-# OU usar Make
-make install
-make run
-
-# 3. Acessar a API
-# API: http://localhost:8000
-# Documentação interativa: http://localhost:8000
+make docker-logs
 ```
 
 ---
 
-## 🎮 Como Usar a API
+## 🎮 Usar a API
 
-### 1. Verificar Health
+### Health Check
 ```bash
 curl http://localhost:8000/health
 ```
 
-### 2. Simular Uma Partida
+### Simular Uma Partida
 ```bash
 curl -X POST http://localhost:8000/game/simulate
 ```
@@ -67,11 +43,13 @@ curl -X POST http://localhost:8000/game/simulate
 ```json
 {
   "winner": "impulsive",
+  "rounds": 342,
+  "timeout": false,
   "players": ["impulsive", "demanding", "cautious", "random"]
 }
 ```
 
-### 3. Executar Simulação em Lote (Estatísticas)
+### Executar Simulação em Lote (300 partidas)
 ```bash
 curl -X POST http://localhost:8000/game/stats \
   -H "Content-Type: application/json" \
@@ -102,109 +80,75 @@ curl -X POST http://localhost:8000/game/stats \
 
 ## 🧪 Testes
 
-### Com Docker
+### Rodar Testes no Docker
 ```bash
-docker-compose run --rm api pytest -v
+# Testes unitários
+make docker-test-unit
+
+# Testes de integração
+make docker-test-integration
 ```
 
-### Sem Docker
+### Rodar Testes Localmente (requer make setup-dev)
 ```bash
-# Rodar todos os testes
-uv run pytest -v
-
-# Rodar arquivo específico
-uv run pytest tests/test_strategies.py
-
-# Com cobertura
-uv run pytest --cov=app --cov-report=html
-
-# OU usar Make
-make test
+make test-unit        # Testes unitários (fast, ~0.1s)
+make test-integration # Testes de integração (API, E2E, ~0.9s)
+make coverage         # Coverage (apenas unit tests)
 ```
 
 ---
 
 ## 💻 Desenvolvimento
 
-### Setup Rápido para Desenvolvedores
-
-Se você está contribuindo ou desenvolvendo o projeto:
+### Setup Inicial para Desenvolvedores
 
 ```bash
 # Setup automatizado (recomendado)
-./setup-dev.sh
-
-# OU
 make setup-dev
 ```
 
 **O que isso faz:**
-- Instala todas as dependências (incluindo ferramentas de dev)
+- Instala dependências (Python 3.12 + uv necessário)
 - Configura pre-push hook para verificações de qualidade
-- Formata o código inicial
+- Formata código inicial
 - Roda verificações de qualidade
 
-### Ferramentas de Qualidade de Código
+### Comandos de Qualidade de Código
 
-#### Formatar Código (Black)
 ```bash
-make format
-# OU
-uv run black app/ tests/
-```
-
-#### Verificar Linting (Flake8 + Pylint)
-```bash
-make lint
-# OU
-uv run flake8 app/ tests/
-uv run pylint app/ --recursive=y
-```
-
-#### Verificar Tipos (MyPy)
-```bash
-make typecheck
-# OU
-uv run mypy app/
-```
-
-#### Rodar Tudo de Uma Vez
-```bash
-make quality
+make format    # Formatar código
+make lint      # Linters (Flake8 + Pylint)
+make typecheck # Type checking (MyPy)
+make quality   # Rodar tudo (format + lint + typecheck)
 ```
 
 ### Pre-push Hook
 
-**Importante**: O pre-push hook roda automaticamente antes de cada `git push` e executa:
+**Importante**: O pre-push hook roda automaticamente antes de cada `git push`:
 1. ✓ Formatação (Black)
 2. ✓ Linting (Flake8 + Pylint)
 3. ✓ Type checking (MyPy)
-4. ✓ Testes (Pytest)
+4. ✓ Testes unitários (Pytest)
 
-Se qualquer verificação falhar, o push é bloqueado. Isso garante que todo código enviado ao repositório tem qualidade.
+Se qualquer verificação falhar, o push é bloqueado.
+
+**Bypass** (não recomendado):
+```bash
+git push --no-verify
+```
 
 ---
 
-## ⚙️ Configuração (Variáveis de Ambiente)
+## ⚙️ Configuração
 
-Você pode configurar a aplicação através de variáveis de ambiente com prefixo `MONOPOLY_`:
+Variáveis de ambiente no `docker-compose.yml`:
 
 | Variável | Padrão | Descrição |
 |----------|--------|-----------|
-| `MONOPOLY_DEBUG` | `false` | Modo debug (hot reload) |
-| `MONOPOLY_LOG_LEVEL` | `WARNING` | Nível de log (DEBUG, INFO, WARNING, ERROR) |
+| `MONOPOLY_DEBUG` | `false` | Modo debug |
+| `MONOPOLY_LOG_LEVEL` | `INFO` | Nível de log (DEBUG, INFO, WARNING, ERROR) |
 | `MONOPOLY_API_HOST` | `0.0.0.0` | Host da API |
 | `MONOPOLY_API_PORT` | `8000` | Porta da API |
-
-**Exemplo Docker:**
-```bash
-# Edite docker-compose.yml e ajuste as variáveis de ambiente
-```
-
-**Exemplo Local:**
-```bash
-MONOPOLY_LOG_LEVEL=DEBUG uv run start
-```
 
 ---
 
@@ -213,58 +157,23 @@ MONOPOLY_LOG_LEVEL=DEBUG uv run start
 - **Tabuleiro**: 20 propriedades com custos (50-200) e aluguéis (10-100) aleatórios
 - **Jogadores**: 4 jogadores começam com saldo de 300
 - **Turnos**:
-  - Rolar 1d6
-  - Mover no sentido horário
-  - Ao cair em propriedade → comprar (se livre) ou pagar aluguel (se ocupada)
+  - Rolar 1d6 e mover no sentido horário
+  - Cair em propriedade → comprar (se livre) ou pagar aluguel (se ocupada)
   - Completar uma volta → ganhar salário de 100
 - **Eliminação**: Saldo < 0 → jogador eliminado, propriedades liberadas
-- **Vitória**: Último jogador restante OU maior saldo após 1000 rodadas
+- **Vitória**: Último jogador restante OU maior saldo após 1000 rodadas (timeout)
 
 ### Estratégias dos Jogadores
 
-1. **Impulsivo**: Sempre compra quando possível
-2. **Exigente**: Só compra se aluguel > 50
-3. **Cauteloso**: Só compra se saldo após compra ≥ 80
-4. **Aleatório**: 50% de chance de comprar
+1. **Impulsivo** (`impulsive`): Sempre compra quando possível
+2. **Exigente** (`demanding`): Só compra se aluguel > 50
+3. **Cauteloso** (`cautious`): Só compra se saldo após compra ≥ 80
+4. **Aleatório** (`random`): 50% de chance de comprar
 
 ---
 
-## 🏗️ Arquitetura (Resumo)
+## 📚 Mais Informações
 
-### Organização em Camadas
-
-```
-app/
-├── core/              # Contratos e configurações
-│   ├── interfaces.py  # Interfaces abstratas (Strategy, Repository, etc.)
-│   └── config.py      # Configurações do jogo e aplicação
-├── domain/            # Lógica de negócio
-│   ├── models.py      # Entidades (Property, Player, Board, GameState)
-│   ├── strategies.py  # Implementações de estratégias
-│   └── engine.py      # Motor do jogo (regras e execução)
-├── application/       # Casos de uso
-│   └── simulator.py   # Orquestração de simulações
-├── infrastructure/    # Camada de infraestrutura
-│   ├── api/           # Endpoints FastAPI
-│   └── repositories/  # Implementações de repositórios
-└── utils/             # Utilitários
-```
-
-### Design Patterns Utilizados
-
-- **Strategy Pattern**: Comportamentos de compra encapsulados
-- **Factory Pattern**: Criação centralizada de jogadores
-- **Repository Pattern**: Abstração de armazenamento
-- **Dependency Injection**: Via FastAPI Depends()
-- **Clean Architecture**: Separação em camadas, domínio independente
-
-### Princípios SOLID
-
-- **Dependency Inversion**: Todas as dependências apontam para abstrações (`app/core/interfaces.py`)
-- **Single Responsibility**: Cada classe tem uma responsabilidade única
-- **Open/Closed**: Extensível via estratégias, sem modificar código existente
-
----
+Para detalhes de arquitetura, design patterns e princípios SOLID, consulte o [README.md](README.md).
 
 **Versão**: 1.0.0
-**Gerado**: 2025-10-02

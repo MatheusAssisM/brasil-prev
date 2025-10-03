@@ -60,36 +60,36 @@ monopoly-simulator-api/
 └── pyproject.toml          # Project configuration
 ```
 
-## Installation
+## Installation & Usage
 
-### Prerequisites
-
-- Python 3.12+
-- [uv](https://github.com/astral-sh/uv) package manager
-
-### Setup
+### Quick Start with Docker (Recommended)
 
 ```bash
 # Clone the repository
 git clone <repository-url>
 cd brasil-prev
 
-# Install dependencies
-uv sync
-
-# Install in editable mode
-uv pip install -e .
-```
-
-## Usage
-
-### Start the API Server
-
-```bash
-uv run start
+# Start the application
+make docker-up
 ```
 
 The server will start at `http://localhost:8000`
+
+**Stop the application:**
+```bash
+make docker-down
+```
+
+### Local Development Setup (Optional)
+
+For development, you'll need:
+- Python 3.12+
+- [uv](https://github.com/astral-sh/uv) package manager
+
+```bash
+# Install dependencies and setup hooks
+make setup-dev
+```
 
 ### API Endpoints
 
@@ -147,33 +147,55 @@ Visit `http://localhost:8000/docs` for Swagger UI documentation.
 
 ### Quick Setup for New Developers
 
+**Requirements:** Python 3.12+ and [uv](https://github.com/astral-sh/uv) installed.
+
 ```bash
 # Automated setup (installs dependencies + configures pre-push hooks)
-./setup-dev.sh
-
-# OR using Make
 make setup-dev
 ```
 
 This will:
 - Install all dependencies (including dev tools)
 - Configure pre-push hooks for code quality checks
-- Run initial formatting and quality checks
+- Format code and run initial quality checks
+
+### Docker Commands
+
+```bash
+# Build image
+make docker-build
+
+# Start containers
+make docker-up
+
+# View logs
+make docker-logs
+
+# Stop containers
+make docker-down
+
+# Run tests in Docker
+make docker-test-unit
+make docker-test-integration
+```
 
 ### Run Tests
 
+This project separates unit tests (fast, isolated) from integration tests (API, E2E flows):
+
 ```bash
-# Run all tests
-uv run pytest
+# Run unit tests
+make test-unit
 
-# Run with coverage
-uv run pytest --cov=app --cov-report=html
+# Run integration tests (API, E2E)
+make test-integration
 
-# Run specific test file
-uv run pytest tests/test_strategies.py
+# Run unit tests with coverage report
+make coverage
 
-# OR using Make
-make test
+# Run tests in Docker
+make docker-test-unit
+make docker-test-integration
 ```
 
 ### Code Quality Tools
@@ -183,10 +205,6 @@ This project uses multiple tools to ensure code quality:
 #### Formatter
 - **Black**: Opinionated code formatter
 ```bash
-# Format all code
-uv run black app/ tests/
-
-# OR using Make
 make format
 ```
 
@@ -194,45 +212,33 @@ make format
 - **Flake8**: Style guide enforcement
 - **Pylint**: Code analysis for bugs and quality
 ```bash
-# Run both linters
-uv run flake8 app/ tests/
-uv run pylint app/ --recursive=y
-
-# OR using Make
 make lint
 ```
 
 #### Type Checker
 - **MyPy**: Static type checking
 ```bash
-# Check types
-uv run mypy app/
-
-# OR using Make
 make typecheck
 ```
 
 #### Run All Quality Checks
 ```bash
-# Format + Lint + Type Check + Tests
+# Format + Lint + Type Check (no tests)
 make quality
 ```
 
 ### Pre-push Hook
 
-A pre-push git hook is automatically configured via `./setup-dev.sh`. It runs:
+A pre-push git hook is automatically configured via `make setup-dev`. It runs:
 1. Black (format check)
 2. Flake8
 3. Pylint
 4. MyPy
-5. Pytest
+5. Unit Tests (pytest -m unit)
 
 If any check fails, the push is blocked. This ensures all code pushed to the repository meets quality standards.
 
-**To bypass the hook** (not recommended):
-```bash
-git push --no-verify
-```
+**Note:** You can still run the application via Docker without running `make setup-dev`. The setup is only needed for local development and contributing.
 
 ## Architecture Decisions
 
