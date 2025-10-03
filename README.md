@@ -8,6 +8,7 @@
 
 ## Features
 - **FastAPI REST API**: Run single or batch simulations via HTTP with performance metrics
+- **Live Deployment**: Available at https://brasil-prev-api.assisdev.com.br/
 
 ## Project Structure
 
@@ -65,11 +66,13 @@ cp .env-sample .env
 make docker-up
 
 # Without docker
-make install
+make setup-dev
 make run
 ```
 
 The server will start at `http://localhost:8000`
+
+**Live deployment available at:** https://brasil-prev-api.assisdev.com.br/
 
 **Stop the application:**
 ```bash
@@ -98,14 +101,20 @@ All settings have defaults and can be overridden via environment variables prefi
 
 ### API Endpoints
 
+You can test the API locally or use the live deployment at https://brasil-prev-api.assisdev.com.br/
+
 #### Health Check
 ```bash
 curl http://localhost:8000/health
+# Or use live deployment:
+curl https://brasil-prev-api.assisdev.com.br/health
 ```
 
 #### Run Single Game Simulation
 ```bash
 curl -X POST http://localhost:8000/game/simulate
+# Or use live deployment:
+curl -X POST https://brasil-prev-api.assisdev.com.br/game/simulate
 ```
 
 **Response:**
@@ -119,6 +128,10 @@ curl -X POST http://localhost:8000/game/simulate
 #### Run Batch Simulations
 ```bash
 curl -X POST http://localhost:8000/simulations/benchmark \
+  -H "Content-Type: application/json" \
+  -d '{"num_simulations": 300}'
+# Or use live deployment:
+curl -X POST https://brasil-prev-api.assisdev.com.br/simulations/benchmark \
   -H "Content-Type: application/json" \
   -d '{"num_simulations": 300}'
 ```
@@ -150,7 +163,8 @@ curl -X POST http://localhost:8000/simulations/benchmark \
 
 ### Interactive API Documentation
 
-Visit `http://localhost:8000/` for Swagger UI documentation.
+- **Local:** http://localhost:8000/
+- **Live Deployment:** https://brasil-prev-api.assisdev.com.br/
 
 ## Development
 

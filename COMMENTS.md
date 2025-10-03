@@ -20,6 +20,7 @@ make run
 **Acessar:**
 - API: http://localhost:8000
 - Documentação interativa: http://localhost:8000/docs
+- **Deployment ao vivo**: https://brasil-prev-api.assisdev.com.br/
 
 **Parar aplicação:**
 ```bash
@@ -30,14 +31,20 @@ make docker-down
 
 ## 🎮 Usar a API
 
+Você pode testar a API localmente ou usar o deployment ao vivo em https://brasil-prev-api.assisdev.com.br/
+
 ### Health Check
 ```bash
 curl http://localhost:8000/health
+# Ou usar deployment ao vivo:
+curl https://brasil-prev-api.assisdev.com.br/health
 ```
 
 ### Simular Uma Partida
 ```bash
 curl -X POST http://localhost:8000/game/simulate
+# Ou usar deployment ao vivo:
+curl -X POST https://brasil-prev-api.assisdev.com.br/game/simulate
 ```
 
 **Resposta:**
@@ -53,6 +60,10 @@ curl -X POST http://localhost:8000/game/simulate
 ### Executar Simulação em Lote
 ```bash
 curl -X POST http://localhost:8000/simulations/benchmark \
+  -H "Content-Type: application/json" \
+  -d '{"num_simulations": 300}'
+# Ou usar deployment ao vivo:
+curl -X POST https://brasil-prev-api.assisdev.com.br/simulations/benchmark \
   -H "Content-Type: application/json" \
   -d '{"num_simulations": 300}'
 ```
