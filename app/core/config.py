@@ -35,5 +35,16 @@ class Settings(BaseSettings):
 
     LOG_LEVEL: str = "WARNING"
 
+    # Parallelization settings
+    ENABLE_PARALLEL: bool = True
+    MAX_WORKERS: int = 0
+
+    model_config = {
+        "env_file": ".env",
+        "env_prefix": "MONOPOLY_",
+        "case_sensitive": False,
+        "extra": "ignore",
+    }
+
 
 settings = Settings()
