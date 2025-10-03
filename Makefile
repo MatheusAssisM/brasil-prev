@@ -38,7 +38,7 @@ test-integration:
 	uv run pytest -m integration -v
 
 coverage:
-	uv run pytest -m unit --cov=app --cov-report=term-missing --cov-report=html
+	uv run pytest -m unit --cov=app --cov-report=term-missing --cov-report=html --cov-fail-under=95
 	@echo ""
 	@echo "Coverage report generated in htmlcov/index.html"
 
