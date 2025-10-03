@@ -7,7 +7,7 @@ from app.domain.strategies import (
     CautiousStrategy,
     RandomStrategy,
 )
-from app.core.config import GameConfig
+from app.core.config import GameConfig, strategy_config
 from app.core.exceptions import InvalidPlayerError
 
 
@@ -38,7 +38,7 @@ class PlayerFactory:
     def create_demanding_player(
         name: str = "Demanding Player",
         balance: int = GameConfig.INITIAL_BALANCE,
-        rent_threshold: int = GameConfig.DEMANDING_RENT_THRESHOLD,
+        rent_threshold: int = strategy_config.DEMANDING_RENT_THRESHOLD,
     ) -> Player:
         """
         Create a player with demanding strategy.
@@ -63,7 +63,7 @@ class PlayerFactory:
     def create_cautious_player(
         name: str = "Cautious Player",
         balance: int = GameConfig.INITIAL_BALANCE,
-        reserve_threshold: int = GameConfig.CAUTIOUS_RESERVE_THRESHOLD,
+        reserve_threshold: int = strategy_config.CAUTIOUS_RESERVE_THRESHOLD,
     ) -> Player:
         """
         Create a player with cautious strategy.

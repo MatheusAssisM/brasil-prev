@@ -1,4 +1,19 @@
+from dataclasses import dataclass
 from pydantic_settings import BaseSettings
+
+
+@dataclass(frozen=True)
+class StrategyConfig:
+    """Configuration for player strategies."""
+
+    # Demanding strategy configuration
+    DEMANDING_RENT_THRESHOLD: int = 50
+
+    # Cautious strategy configuration
+    CAUTIOUS_RESERVE_THRESHOLD: int = 80
+
+    # Random strategy probability
+    RANDOM_BUY_PROBABILITY: float = 0.5
 
 
 class GameConfig:
@@ -18,9 +33,9 @@ class GameConfig:
     # Game rules
     MAX_ROUNDS = 1000
 
-    # Strategy thresholds
-    DEMANDING_RENT_THRESHOLD = 50
-    CAUTIOUS_RESERVE_THRESHOLD = 80
+
+# Global strategy configuration instance
+strategy_config = StrategyConfig()
 
 
 class Settings(BaseSettings):
