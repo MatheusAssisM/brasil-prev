@@ -1,4 +1,3 @@
-from app.domain.value_objects import Money
 import pytest
 
 from app.domain.factories import PlayerFactory

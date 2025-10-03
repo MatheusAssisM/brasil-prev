@@ -23,9 +23,13 @@ class Property:
 
     def __post_init__(self) -> None:
         if not isinstance(self.cost, Money):
-            raise InvalidPropertyError(f"Property cost must be Money, got {type(self.cost).__name__}")
+            raise InvalidPropertyError(
+                f"Property cost must be Money, got {type(self.cost).__name__}"
+            )
         if not isinstance(self.rent, Money):
-            raise InvalidPropertyError(f"Property rent must be Money, got {type(self.rent).__name__}")
+            raise InvalidPropertyError(
+                f"Property rent must be Money, got {type(self.rent).__name__}"
+            )
         if not self.cost.is_positive():
             raise InvalidPropertyError(f"Property cost must be positive, got {self.cost.amount}")
         if self.rent.is_negative():
@@ -82,9 +86,13 @@ class Player:
     def can_buy(self, property_cost: Money) -> bool:
         """Check if player has enough balance to buy a property."""
         if not isinstance(property_cost, Money):
-            raise InvalidPropertyError(f"Property cost must be Money, got {type(property_cost).__name__}")
+            raise InvalidPropertyError(
+                f"Property cost must be Money, got {type(property_cost).__name__}"
+            )
         if property_cost.is_negative():
-            raise InvalidPropertyError(f"Property cost cannot be negative, got {property_cost.amount}")
+            raise InvalidPropertyError(
+                f"Property cost cannot be negative, got {property_cost.amount}"
+            )
         return self.balance.is_sufficient_for(property_cost)
 
     def buy_property(self, property: Property) -> bool:
@@ -213,7 +221,9 @@ class GameState:
 
         # Case 3: Timeout - winner is player with highest balance
         if self.round_count >= self.max_rounds:
-            self.winner = max(active_players, key=lambda p: int(p.balance)) if active_players else None
+            self.winner = (
+                max(active_players, key=lambda p: int(p.balance)) if active_players else None
+            )
             self.game_over = True
             return True
 
