@@ -147,8 +147,14 @@ class TestMockedIntegration:
         assert mock_logger.info.call_count >= 2
         call_args = [call[0][0] for call in mock_logger.info.call_args_list]
         # Check for parallel execution messages
-        assert "Starting parallel batch simulation" in call_args or "Running batch simulation (single-threaded)" in call_args
-        assert "Parallel batch simulation completed" in call_args or "Running batch simulation (single-threaded)" in call_args
+        assert (
+            "Starting parallel batch simulation" in call_args
+            or "Running batch simulation (single-threaded)" in call_args
+        )
+        assert (
+            "Parallel batch simulation completed" in call_args
+            or "Running batch simulation (single-threaded)" in call_args
+        )
 
 
 @pytest.mark.integration

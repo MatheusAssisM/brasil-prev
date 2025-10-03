@@ -46,7 +46,9 @@ class BatchSimulationResult(BaseModel):
     most_winning_strategy: Optional[str] = None
     execution_time_seconds: float = Field(description="Total execution time in seconds")
     simulations_per_second: float = Field(description="Throughput (simulations/second)")
-    parallelization_enabled: bool = Field(description="Always True - parallel execution is always used")
+    parallelization_enabled: bool = Field(
+        description="Always True - parallel execution is always used"
+    )
     num_workers: int = Field(description="Number of worker processes used for parallel execution")
 
 

@@ -17,7 +17,9 @@ class TestAPIErrorHandling:
 
     def test_batch_simulation_invalid_type(self, test_client):
         """Test batch simulation with wrong type."""
-        response = test_client.post("/simulations/benchmark", json={"num_simulations": "not a number"})
+        response = test_client.post(
+            "/simulations/benchmark", json={"num_simulations": "not a number"}
+        )
         assert response.status_code == 422
 
     def test_batch_simulation_with_default_value(self, test_client):
