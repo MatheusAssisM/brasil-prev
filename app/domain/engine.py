@@ -5,7 +5,7 @@ from datetime import datetime
 
 
 from app.domain.models import Player, Board, GameState, Property
-from app.core.config import GameConfig
+from app.core.config import settings
 from app.core.interfaces import Logger
 from app.core.exceptions import GameConfigurationError, InvalidGameStateError
 from app.domain.events import (
@@ -38,7 +38,7 @@ class GameEngine:
             raise GameConfigurationError("Board cannot be None")
 
         self.state: GameState = GameState(
-            players=players, board=board, max_rounds=GameConfig.MAX_ROUNDS
+            players=players, board=board, max_rounds=settings.MAX_ROUNDS
         )
         self.dice_roller: Optional[Callable[[], int]] = None
         self.game_id = str(uuid.uuid4())
@@ -77,7 +77,7 @@ class GameEngine:
             return
 
         steps = self.roll_dice()
-        player.move(steps, self.state.board.size(), GameConfig.ROUND_SALARY)
+        player.move(steps, self.state.board.size(), settings.ROUND_SALARY)
 
         property = self.state.board.get_property(int(player.position))
         self._handle_property_landing(player, property)

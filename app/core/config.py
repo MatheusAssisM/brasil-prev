@@ -1,41 +1,4 @@
-from dataclasses import dataclass
 from pydantic_settings import BaseSettings
-
-
-@dataclass(frozen=True)
-class StrategyConfig:
-    """Configuration for player strategies."""
-
-    # Demanding strategy configuration
-    DEMANDING_RENT_THRESHOLD: int = 50
-
-    # Cautious strategy configuration
-    CAUTIOUS_RESERVE_THRESHOLD: int = 80
-
-    # Random strategy probability
-    RANDOM_BUY_PROBABILITY: float = 0.5
-
-
-class GameConfig:
-    """Game rules and constants."""
-
-    # Board configuration
-    NUM_PROPERTIES = 20
-    MIN_PROPERTY_COST = 50
-    MAX_PROPERTY_COST = 200
-    MIN_PROPERTY_RENT = 10
-    MAX_PROPERTY_RENT = 100
-
-    # Player configuration
-    INITIAL_BALANCE = 300
-    ROUND_SALARY = 100
-
-    # Game rules
-    MAX_ROUNDS = 1000
-
-
-# Global strategy configuration instance
-strategy_config = StrategyConfig()
 
 
 class Settings(BaseSettings):
@@ -59,9 +22,31 @@ class Settings(BaseSettings):
     RATE_LIMIT_DEFAULT: str = "100/minute"
     RATE_LIMIT_BENCHMARK: str = "10/minute"
 
+    # Demanding strategy configuration
+    DEMANDING_RENT_THRESHOLD: int = 50
+
+    # Cautious strategy configuration
+    CAUTIOUS_RESERVE_THRESHOLD: int = 80
+
+    # Random strategy probability
+    RANDOM_BUY_PROBABILITY: float = 0.5
+
+    # Board configuration
+    NUM_PROPERTIES: int = 20
+    MIN_PROPERTY_COST: int = 50
+    MAX_PROPERTY_COST: int = 200
+    MIN_PROPERTY_RENT: int = 10
+    MAX_PROPERTY_RENT: int = 100
+
+    # Player configuration
+    INITIAL_BALANCE: int = 300
+    ROUND_SALARY: int = 100
+
+    # Game rules
+    MAX_ROUNDS: int = 1000
+
     model_config = {
         "env_file": ".env",
-        "env_prefix": "MONOPOLY_",
         "case_sensitive": False,
         "extra": "ignore",
     }

@@ -6,7 +6,7 @@ from app.core.exceptions import GameConfigurationError
 from app.domain.models import Board, Property
 from app.domain.value_objects import Money
 from app.infrastructure.persistence.repositories import InMemoryPropertyRepository
-from app.core.config import GameConfig
+from app.core.config import settings
 
 
 class StandardDiceRoller(DiceRoller):
@@ -32,15 +32,15 @@ class RandomBoardGenerator(BoardGenerator):
             Board instance with randomly generated properties
         """
         if num_properties is None:
-            num_properties = GameConfig.NUM_PROPERTIES
+            num_properties = settings.NUM_PROPERTIES
 
         if num_properties <= 0:
             raise GameConfigurationError(f"num_properties must be positive, got {num_properties}")
 
         properties = []
         for _ in range(num_properties):
-            cost = Money(random.randint(GameConfig.MIN_PROPERTY_COST, GameConfig.MAX_PROPERTY_COST))
-            rent = Money(random.randint(GameConfig.MIN_PROPERTY_RENT, GameConfig.MAX_PROPERTY_RENT))
+            cost = Money(random.randint(settings.MIN_PROPERTY_COST, settings.MAX_PROPERTY_COST))
+            rent = Money(random.randint(settings.MIN_PROPERTY_RENT, settings.MAX_PROPERTY_RENT))
             properties.append(Property(cost=cost, rent=rent))
 
         repository = InMemoryPropertyRepository(properties)
