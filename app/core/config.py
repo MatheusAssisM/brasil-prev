@@ -39,6 +39,11 @@ class Settings(BaseSettings):
     ENABLE_PARALLEL: bool = True
     MAX_WORKERS: int = 0
 
+    # Rate limiting settings
+    RATE_LIMIT_ENABLED: bool = True
+    RATE_LIMIT_DEFAULT: str = "100/minute"
+    RATE_LIMIT_BENCHMARK: str = "10/minute"
+
     model_config = {
         "env_file": ".env",
         "env_prefix": "MONOPOLY_",
