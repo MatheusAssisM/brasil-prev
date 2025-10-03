@@ -1,37 +1,43 @@
-.PHONY: help install test run clean format lint typecheck quality setup-dev coverage
+.PHONY: help install test-unit test-integration clean format lint typecheck quality setup-dev coverage docker-build docker-up docker-down docker-logs docker-test-unit docker-test-integration
 
 help:
 	@echo "Brasil Prev - Monopoly Game Simulator"
 	@echo ""
-	@echo "Available commands:"
-	@echo "  make install    - Install dependencies and project"
-	@echo "  make setup-dev  - Setup development environment (deps + hooks)"
-	@echo "  make test       - Run tests"
-	@echo "  make coverage   - Run tests with coverage report"
-	@echo "  make run        - Start the API server"
-	@echo "  make format     - Format code with black"
-	@echo "  make lint       - Run flake8 and pylint"
-	@echo "  make typecheck  - Run mypy type checking"
-	@echo "  make quality    - Run all quality checks (format, lint, type, test)"
-	@echo "  make clean      - Clean up cache and build files"
-
-install:
-	uv sync
-	uv pip install -e .
+	@echo "Docker Commands (Production):"
+	@echo "  make docker-build     - Build Docker image"
+	@echo "  make docker-up        - Start application in Docker"
+	@echo "  make docker-down      - Stop Docker containers"
+	@echo "  make docker-logs      - View container logs"
+	@echo ""
+	@echo "Development Commands:"
+	@echo "  make install          - Install dependencies locally"
+	@echo "  make setup-dev        - Setup dev environment (deps + hooks + quality)"
+	@echo "  make test-unit        - Run unit tests"
+	@echo "  make test-integration - Run integration tests"
+	@echo "  make coverage         - Run unit tests with coverage"
+	@echo "  make format           - Format code with black"
+	@echo "  make lint             - Run flake8 and pylint"
+	@echo "  make typecheck        - Run mypy type checking"
+	@echo "  make quality          - Run quality checks (format + lint + typecheck)"
+	@echo "  make clean            - Clean cache and build files"
+	@echo ""
+	@echo "Docker Testing:"
+	@echo "  make docker-test-unit        - Run unit tests in Docker"
+	@echo "  make docker-test-integration - Run integration tests in Docker"
 
 setup-dev:
 	@bash setup-dev.sh
 
-test:
-	uv run pytest -v
+test-unit:
+	uv run pytest -m unit -v
+
+test-integration:
+	uv run pytest -m integration -v
 
 coverage:
-	uv run pytest --cov=app --cov-report=term-missing --cov-report=html
+	uv run pytest -m unit --cov=app --cov-report=term-missing --cov-report=html
 	@echo ""
 	@echo "Coverage report generated in htmlcov/index.html"
-
-run:
-	uv run start
 
 format:
 	uv run black app/ tests/
@@ -55,3 +61,25 @@ clean:
 	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
 	find . -type f -name "*.pyc" -delete
 	rm -rf htmlcov
+
+docker-build:
+	docker-compose build
+
+docker-up:
+	docker-compose up -d
+	@echo ""
+	@echo "✓ Application started at http://localhost:8000"
+	@echo "  View logs: make docker-logs"
+	@echo "  Stop: make docker-down"
+
+docker-down:
+	docker-compose down
+
+docker-logs:
+	docker-compose logs -f api
+
+docker-test-unit:
+	docker-compose run --rm api pytest -m unit -v
+
+docker-test-integration:
+	docker-compose run --rm api pytest -m integration -v
