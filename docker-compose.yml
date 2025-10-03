@@ -9,11 +9,12 @@ services:
     container_name: monopoly-api
     ports:
       - "8000:8000"
-    environment:
-      - MONOPOLY_DEBUG=false
-      - MONOPOLY_LOG_LEVEL=INFO
-      - MONOPOLY_API_HOST=0.0.0.0
-      - MONOPOLY_API_PORT=8000
+    volumes:
+      - ./app:/app/app
+      - ./tests:/app/tests
+    env_file:
+      - .env
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]

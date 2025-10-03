@@ -28,6 +28,9 @@ help:
 setup-dev:
 	@bash setup-dev.sh
 
+run:
+	uv run start
+
 test-unit:
 	uv run pytest -m unit -v
 
@@ -66,7 +69,7 @@ docker-build:
 	docker-compose build
 
 docker-up:
-	docker-compose up -d
+	docker-compose up
 	@echo ""
 	@echo "✓ Application started at http://localhost:8000"
 	@echo "  View logs: make docker-logs"
@@ -75,11 +78,3 @@ docker-up:
 docker-down:
 	docker-compose down
 
-docker-logs:
-	docker-compose logs -f api
-
-docker-test-unit:
-	docker-compose run --rm api pytest -m unit -v
-
-docker-test-integration:
-	docker-compose run --rm api pytest -m integration -v
