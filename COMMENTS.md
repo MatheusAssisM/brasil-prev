@@ -11,9 +11,9 @@
 cp .env-sample .env
 make docker-up
 
-# Sem docker
+# Sem docker, necessário Python 3.13
 cp .env-sample .env
-make install
+make setup-dev
 make run
 ```
 
