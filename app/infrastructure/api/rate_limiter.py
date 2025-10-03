@@ -1,7 +1,6 @@
 from slowapi import Limiter
 from slowapi.util import get_remote_address
-from slowapi.errors import RateLimitExceeded
-from fastapi import Request
+from fastapi import Request, Response
 from fastapi.responses import JSONResponse
 
 from app.core.config import settings
@@ -30,17 +29,17 @@ limiter = Limiter(
 
 
 def rate_limit_exceeded_handler(
-    request: Request, exc: RateLimitExceeded  # pylint: disable=unused-argument
-) -> JSONResponse:
+    request: Request, exc: Exception  # pylint: disable=unused-argument
+) -> Response:
     """
     Custom handler for rate limit exceeded errors.
 
     Args:
         request: FastAPI request object (required by FastAPI exception handler interface)
-        exc: RateLimitExceeded exception
+        exc: Exception (RateLimitExceeded)
 
     Returns:
-        JSONResponse with 429 status code and error details
+        Response with 429 status code and error details
     """
     return JSONResponse(
         status_code=429,
