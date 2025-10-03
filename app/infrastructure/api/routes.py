@@ -79,7 +79,8 @@ async def simulate_game(
             if winner_player:
                 winner_strategy = winner_player["strategy"]
 
-        player_strategies = [p["strategy"] for p in result["players"]]
+        sorted_players = sorted(result["players"], key=lambda p: p["balance"], reverse=True)
+        player_strategies = [p["strategy"] for p in sorted_players]
 
         return GameResult(
             winner=winner_strategy,
