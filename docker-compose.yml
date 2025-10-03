@@ -3,7 +3,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: monopoly-simulator-api:latest
     container_name: monopoly-api
     ports:
       - "8000:8000"

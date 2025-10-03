@@ -43,35 +43,5 @@ else
 fi
 echo ""
 
-echo -e "${BLUE}4/4 Running initial code quality checks...${NC}"
-echo ""
 
-# Run formatters and checks (don't fail on first setup)
-echo "  Formatting code with black..."
-uv run black app/ tests/ || true
-
-echo "  Running flake8..."
-uv run flake8 app/ tests/ || echo -e "${YELLOW}  (Some flake8 warnings - you may want to fix these)${NC}"
-
-echo "  Running pylint..."
-uv run pylint app/ --recursive=y || echo -e "${YELLOW}  (Some pylint warnings - you may want to fix these)${NC}"
-
-echo "  Running mypy..."
-uv run mypy app/ || echo -e "${YELLOW}  (Some mypy errors - you may want to fix these)${NC}"
-
-echo "  Running tests..."
-uv run pytest || echo -e "${YELLOW}  (Some tests failed - you may want to check these)${NC}"
-
-echo ""
 echo -e "${GREEN}✓ Development environment setup complete!${NC}"
-echo ""
-echo "Available commands:"
-echo "  make run        - Start the API server"
-echo "  make test       - Run tests"
-echo "  make format     - Format code with black"
-echo "  make lint       - Run flake8 and pylint"
-echo "  make typecheck  - Run mypy type checking"
-echo "  make quality    - Run all quality checks"
-echo ""
-echo "The pre-push hook will automatically run all quality checks before every push."
-echo ""
