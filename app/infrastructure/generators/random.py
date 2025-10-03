@@ -4,6 +4,7 @@ from typing import Optional
 from app.core.interfaces import DiceRoller, BoardGenerator
 from app.core.exceptions import GameConfigurationError
 from app.domain.models import Board, Property
+from app.domain.value_objects import Money
 from app.infrastructure.persistence.repositories import InMemoryPropertyRepository
 from app.core.config import GameConfig
 
@@ -38,8 +39,8 @@ class RandomBoardGenerator(BoardGenerator):
 
         properties = []
         for _ in range(num_properties):
-            cost = random.randint(GameConfig.MIN_PROPERTY_COST, GameConfig.MAX_PROPERTY_COST)
-            rent = random.randint(GameConfig.MIN_PROPERTY_RENT, GameConfig.MAX_PROPERTY_RENT)
+            cost = Money(random.randint(GameConfig.MIN_PROPERTY_COST, GameConfig.MAX_PROPERTY_COST))
+            rent = Money(random.randint(GameConfig.MIN_PROPERTY_RENT, GameConfig.MAX_PROPERTY_RENT))
             properties.append(Property(cost=cost, rent=rent))
 
         repository = InMemoryPropertyRepository(properties)

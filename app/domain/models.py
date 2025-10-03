@@ -10,21 +10,26 @@ from app.core.exceptions import (
     InvalidMoveError,
     GameConfigurationError,
 )
+from app.domain.value_objects import Money, Position
 
 
 @dataclass(frozen=True)
 class Property:
     """Represents a property on the board (immutable)."""
 
-    cost: int
-    rent: int
+    cost: Money
+    rent: Money
     owner: Optional[Player] = field(default=None, compare=False)
 
     def __post_init__(self) -> None:
-        if self.cost <= 0:
-            raise InvalidPropertyError(f"Property cost must be positive, got {self.cost}")
-        if self.rent < 0:
-            raise InvalidPropertyError(f"Property rent cannot be negative, got {self.rent}")
+        if not isinstance(self.cost, Money):
+            raise InvalidPropertyError(f"Property cost must be Money, got {type(self.cost).__name__}")
+        if not isinstance(self.rent, Money):
+            raise InvalidPropertyError(f"Property rent must be Money, got {type(self.rent).__name__}")
+        if not self.cost.is_positive():
+            raise InvalidPropertyError(f"Property cost must be positive, got {self.cost.amount}")
+        if self.rent.is_negative():
+            raise InvalidPropertyError(f"Property rent cannot be negative, got {self.rent.amount}")
 
     def is_owned(self) -> bool:
         """Check if property has an owner."""
@@ -52,8 +57,8 @@ class Player:
 
         self.name = name
         self.strategy = strategy
-        self.balance = initial_balance
-        self.position = 0
+        self.balance = Money(initial_balance)
+        self.position = Position(0)
         self.properties: List[Property] = []
         self.is_active = True
 
@@ -66,19 +71,21 @@ class Player:
         if round_salary < 0:
             raise InvalidMoveError(f"Round salary cannot be negative, got {round_salary}")
 
-        old_position = self.position
-        self.position = (self.position + steps) % board_size
+        new_position, completed_round = self.position.move(steps, board_size)
+        self.position = new_position
 
-        if self.position < old_position or (old_position + steps >= board_size):
-            self.balance += round_salary
+        if completed_round:
+            self.balance = self.balance.add(round_salary)
 
-        return self.position
+        return int(self.position)
 
-    def can_buy(self, property_cost: int) -> bool:
+    def can_buy(self, property_cost: Money) -> bool:
         """Check if player has enough balance to buy a property."""
-        if property_cost < 0:
-            raise InvalidPropertyError(f"Property cost cannot be negative, got {property_cost}")
-        return self.balance >= property_cost
+        if not isinstance(property_cost, Money):
+            raise InvalidPropertyError(f"Property cost must be Money, got {type(property_cost).__name__}")
+        if property_cost.is_negative():
+            raise InvalidPropertyError(f"Property cost cannot be negative, got {property_cost.amount}")
+        return self.balance.is_sufficient_for(property_cost)
 
     def buy_property(self, property: Property) -> bool:
         """
@@ -95,25 +102,29 @@ class Player:
             return False
 
         if self.strategy.should_buy(self, property):
-            self.balance -= property.cost
+            self.balance = self.balance.subtract(property.cost)
             self.properties.append(property)
             return True
 
         return False
 
-    def pay_rent(self, amount: int) -> None:
+    def pay_rent(self, amount: Money) -> None:
         """Pay rent to another player."""
-        if amount < 0:
-            raise InvalidPropertyError(f"Rent amount cannot be negative, got {amount}")
-        self.balance -= amount
-        if self.balance < 0:
+        if not isinstance(amount, Money):
+            raise InvalidPropertyError(f"Rent amount must be Money, got {type(amount).__name__}")
+        if amount.is_negative():
+            raise InvalidPropertyError(f"Rent amount cannot be negative, got {amount.amount}")
+        self.balance = self.balance.subtract(amount)
+        if self.balance.is_negative():
             self.is_active = False
 
-    def receive_rent(self, amount: int) -> None:
+    def receive_rent(self, amount: Money) -> None:
         """Receive rent from another player."""
-        if amount < 0:
-            raise InvalidPropertyError(f"Rent amount cannot be negative, got {amount}")
-        self.balance += amount
+        if not isinstance(amount, Money):
+            raise InvalidPropertyError(f"Rent amount must be Money, got {type(amount).__name__}")
+        if amount.is_negative():
+            raise InvalidPropertyError(f"Rent amount cannot be negative, got {amount.amount}")
+        self.balance = self.balance.add(amount)
 
     def eliminate(self) -> List[Property]:
         """
@@ -202,7 +213,7 @@ class GameState:
 
         # Case 3: Timeout - winner is player with highest balance
         if self.round_count >= self.max_rounds:
-            self.winner = max(active_players, key=lambda p: p.balance) if active_players else None
+            self.winner = max(active_players, key=lambda p: int(p.balance)) if active_players else None
             self.game_over = True
             return True
 

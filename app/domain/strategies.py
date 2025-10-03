@@ -32,7 +32,7 @@ class DemandingStrategy(PurchaseStrategy):
 
     def should_buy(self, player: Player, property: Property) -> bool:
         """Buy only if rent is greater than the threshold."""
-        return property.rent > self.rent_threshold
+        return int(property.rent) > self.rent_threshold
 
     def get_name(self) -> str:
         return "demanding"
@@ -48,8 +48,8 @@ class CautiousStrategy(PurchaseStrategy):
 
     def should_buy(self, player: Player, property: Property) -> bool:
         """Buy only if balance after purchase remains above threshold."""
-        balance_after_purchase = player.balance - property.cost
-        return balance_after_purchase >= self.reserve_threshold
+        balance_after_purchase = player.balance.subtract(property.cost)
+        return int(balance_after_purchase) >= self.reserve_threshold
 
     def get_name(self) -> str:
         return "cautious"
