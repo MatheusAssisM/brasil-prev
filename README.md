@@ -71,6 +71,9 @@ cd brasil-prev
 
 # Start the application
 make docker-up
+
+# Sem docker
+make run
 ```
 
 The server will start at `http://localhost:8000`
@@ -104,7 +107,7 @@ All settings have defaults and can be overridden via environment variables prefi
 
 #### Health Check
 ```bash
-curl http://localhost:8000/
+curl http://localhost:8000/health
 ```
 
 #### Run Single Game Simulation
@@ -122,7 +125,7 @@ curl -X POST http://localhost:8000/game/simulate
 
 #### Run Batch Simulations
 ```bash
-curl -X POST http://localhost:8000/game/stats \
+curl -X POST http://localhost:8000/simulations/benchmark \
   -H "Content-Type: application/json" \
   -d '{"num_simulations": 300}'
 ```
@@ -144,13 +147,17 @@ curl -X POST http://localhost:8000/game/stats \
     },
     ...
   ],
-  "most_winning_strategy": "impulsive"
+  "most_winning_strategy": "impulsive",
+  "execution_time_seconds": 2.45,
+  "simulations_per_second": 122.45,
+  "parallelization_enabled": true,
+  "num_workers": 8
 }
 ```
 
 ### Interactive API Documentation
 
-Visit `http://localhost:8000/docs` for Swagger UI documentation.
+Visit `http://localhost:8000/` for Swagger UI documentation.
 
 ## Development
 
@@ -168,26 +175,6 @@ This will:
 - Configure pre-push hooks for code quality checks
 - Format code and run initial quality checks
 
-### Docker Commands
-
-```bash
-# Build image
-make docker-build
-
-# Start containers
-make docker-up
-
-# View logs
-make docker-logs
-
-# Stop containers
-make docker-down
-
-# Run tests in Docker
-make docker-test-unit
-make docker-test-integration
-```
-
 ### Run Tests
 
 This project separates unit tests (fast, isolated) from integration tests (API, E2E flows):
@@ -201,10 +188,6 @@ make test-integration
 
 # Run unit tests with coverage report
 make coverage
-
-# Run tests in Docker
-make docker-test-unit
-make docker-test-integration
 ```
 
 ### Code Quality Tools

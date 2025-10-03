@@ -9,6 +9,9 @@
 ```bash
 # Iniciar aplicação
 make docker-up
+
+# Sem docker
+make run
 ```
 
 **Acessar:**
@@ -18,11 +21,6 @@ make docker-up
 **Parar aplicação:**
 ```bash
 make docker-down
-```
-
-**Ver logs:**
-```bash
-make docker-logs
 ```
 
 ---
@@ -49,9 +47,9 @@ curl -X POST http://localhost:8000/game/simulate
 }
 ```
 
-### Executar Simulação em Lote (300 partidas)
+### Executar Simulação em Lote
 ```bash
-curl -X POST http://localhost:8000/game/stats \
+curl -X POST http://localhost:8000/simulations/benchmark \
   -H "Content-Type: application/json" \
   -d '{"num_simulations": 300}'
 ```
@@ -72,22 +70,17 @@ curl -X POST http://localhost:8000/game/stats \
       "avg_rounds_when_won": 287.5
     }
   ],
-  "most_winning_strategy": "impulsive"
+  "most_winning_strategy": "impulsive",
+  "execution_time_seconds": 2.45,
+  "simulations_per_second": 122.45,
+  "parallelization_enabled": true,
+  "num_workers": 8
 }
 ```
 
 ---
 
 ## 🧪 Testes
-
-### Rodar Testes no Docker
-```bash
-# Testes unitários
-make docker-test-unit
-
-# Testes de integração
-make docker-test-integration
-```
 
 ### Rodar Testes Localmente (requer make setup-dev)
 ```bash
@@ -131,11 +124,6 @@ make quality   # Rodar tudo (format + lint + typecheck)
 4. ✓ Testes unitários (Pytest)
 
 Se qualquer verificação falhar, o push é bloqueado.
-
-**Bypass** (não recomendado):
-```bash
-git push --no-verify
-```
 
 ---
 
